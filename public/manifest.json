@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Quản Lý Sức Khỏe",
+  "name": "Hệ Thống Quản Lý Sức Khỏe",
+  "description": "Hệ thống quản lý sức khỏe học sinh theo chuẩn WHO",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#2563eb",
   "background_color": "#ffffff"
 }

@@ -1,22 +1,49 @@
 {
-  "name": "bmi-tracker",
-  "version": "0.1.0",
+  "name": "he-thong-quan-ly-suc-khoe",
+  "version": "1.0.0",
   "private": true,
+  "description": "Hệ thống quản lý sức khỏe học sinh theo chuẩn WHO - Theo dõi BMI, Z-Score và các chỉ số sức khỏe",
+  "author": "Health Management System Team",
+  "keywords": [
+    "BMI",
+    "health-management",
+    "WHO",
+    "z-score",
+    "student-health",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "health-tracking"
+  ],
+  "homepage": ".",
   "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "chart.js": "^4.4.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "autoprefixer": "^10.4.15",
+    "postcss": "^8.4.29",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:prod": "npm run build && echo 'Build completed for Health Management System'",
+    "lint": "eslint src --ext .ts,.tsx --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -35,5 +62,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/he-thong-quan-ly-suc-khoe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/he-thong-quan-ly-suc-khoe/issues"
+  },
+  "license": "MIT"
 }
