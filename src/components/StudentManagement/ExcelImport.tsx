@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Student } from '../../types/interfaces';
+import { studentsService } from '../../services/firestoreService';
 
 interface ExcelImportProps {
-  onStudentsImported: (students: Student[]) => void;
+  onStudentsImported?: (students: Student[]) => void;
 }
 
 interface ExcelRow {
@@ -14,7 +15,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Thêm success message
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Download template function
@@ -25,7 +26,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         'Họ và tên': 'Nguyễn Văn An',
         'Lớp': '1A',
         'Giới tính': 'Nam',
-        'Năm sinh': 2018,
+        'Năm sinh': 2012,
         'Địa chỉ': 'Thôn 1, Vĩnh Trường, Vĩnh Linh, Quảng Trị'
       },
       {
@@ -33,7 +34,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         'Họ và tên': 'Trần Thị Bích',
         'Lớp': '1A',
         'Giới tính': 'Nữ',
-        'Năm sinh': 2018,
+        'Năm sinh': 2013,
         'Địa chỉ': 'Thôn 2, Vĩnh Trường, Vĩnh Linh, Quảng Trị'
       }
     ];
@@ -135,11 +136,17 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         key.toLowerCase().includes('chỉ')
       );
 
+      const schoolField = Object.keys(row).find(key => 
+        key.toLowerCase().includes('trường') || 
+        key.toLowerCase().includes('school')
+      );
+
       const name = nameField ? String(row[nameField]).trim() : '';
       const className = classField ? String(row[classField]).trim() : '';
       const genderStr = genderField ? String(row[genderField]).trim().toLowerCase() : '';
       const birthYear = birthYearField ? parseInt(String(row[birthYearField])) : 0;
       const address = addressField ? String(row[addressField]).trim() : '';
+      const school = schoolField ? String(row[schoolField]).trim() : '';
 
       // Validation
       if (!name) {
@@ -157,8 +164,9 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         continue;
       }
 
-      if (!birthYear || birthYear < 2010 || birthYear > 2020) {
-        errors.push(`Dòng ${rowNum}: Năm sinh không hợp lệ (2010-2020)`);
+      // Birth year validation for 2008-2015 range
+      if (!birthYear || isNaN(birthYear) || birthYear < 2008 || birthYear > 2015) {
+        errors.push(`Dòng ${rowNum}: Năm sinh không hợp lệ (2008-2015)`);
         continue;
       }
 
@@ -169,7 +177,8 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         class: className,
         gender,
         birthYear,
-        address: address || 'Chưa cập nhật'
+        address: address || 'Chưa cập nhật',
+        school: school || ''
       });
     }
 
@@ -180,7 +189,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
     return validatedData;
   };
 
-  // Funct import trực tiếp không cần preview
+  // Function import vào Firestore using existing service
   const handleFileSelect = async (file: File) => {
     if (!file) return;
     
@@ -206,8 +215,11 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
     setSuccessMessage(null);
 
     try {
+      console.log('🔄 Starting Excel import process...');
+      
       // Parse Excel file
       const rawData = await parseExcelFile(file);
+      console.log('📊 Parsed Excel data:', rawData.length, 'rows');
       
       if (rawData.length === 0) {
         throw new Error('File Excel không có dữ liệu');
@@ -215,28 +227,47 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
 
       // Validate and normalize
       const validatedData = validateAndNormalizeData(rawData);
+      console.log('✅ Validated data:', validatedData.length, 'valid rows');
       
       if (validatedData.length === 0) {
         throw new Error('Không có dữ liệu hợp lệ trong file');
       }
 
-      // ← Import trực tiếp luôn
-      const students: Student[] = validatedData.map(row => ({
-        id: crypto.randomUUID(),
+      // Prepare students for Firestore (WITHOUT ID)
+      const studentsToAdd: Omit<Student, 'id'>[] = validatedData.map(row => ({
         name: row.name,
         class: row.class,
         gender: row.gender === 'Nam' ? 'male' : 'female',
         birthYear: row.birthYear,
-        school: 'TH Vĩnh Trường',
+        school: row.school,
         address: row.address,
         createdAt: new Date().toISOString()
       }));
 
-      // Call parent function to import
-      onStudentsImported(students);
+      console.log('🚀 Adding students to Firestore...', studentsToAdd);
+
+      // Add students one by one to get proper IDs
+      const addedStudents: Student[] = [];
+      for (const studentData of studentsToAdd) {
+        try {
+          const addedStudent = await studentsService.create(studentData);
+          addedStudents.push(addedStudent);
+          console.log('✅ Added student:', addedStudent.name, 'with ID:', addedStudent.id);
+        } catch (error) {
+          console.error('❌ Failed to add student:', studentData.name, error);
+        }
+      }
+
+      console.log('✅ Successfully added students:', addedStudents.length);
+
+      // Call parent callback with real students (if provided)
+      if (onStudentsImported) {
+        console.log('📤 Calling parent callback with real students');
+        onStudentsImported(addedStudents);
+      }
       
       // Show success message
-      setSuccessMessage(`✅ Import thành công ${students.length} học sinh!`);
+      setSuccessMessage(`✅ Import thành công ${addedStudents.length} học sinh vào Firestore!`);
       setIsProcessing(false);
       
       // Reset file input
@@ -248,8 +279,8 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       setTimeout(() => setSuccessMessage(null), 5000);
       
     } catch (error) {
-      console.error('Parse error:', error);
-      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi xử lý file');
+      console.error('❌ Import error:', error);
+      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi import');
       setIsProcessing(false);
     }
   };
@@ -300,7 +331,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         {isProcessing ? (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-            <span className="text-lg">Đang import học sinh...</span>
+            <span className="text-lg">Đang import vào Firestore...</span>
           </div>
         ) : (
           <>
@@ -338,7 +369,8 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
         <h3 className="font-medium mb-2">📋 Mẫu file Excel:</h3>
         <p className="text-sm text-gray-600 mb-3">
-          File Excel cần có các cột: <strong>Họ và tên, Lớp, Giới tính, Năm sinh, Địa chỉ</strong>
+          File Excel cần có các cột: <strong>Họ và tên, Lớp, Giới tính, Năm sinh, Địa chỉ</strong><br/>
+          <em>Năm sinh hợp lệ: 2008-2015</em>
         </p>
         <button 
           onClick={downloadTemplate}
@@ -347,6 +379,16 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
           📥 Tải mẫu Excel
         </button>
       </div>
+
+      {/* Debug Info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs">
+          <div className="font-medium mb-1">🔧 Debug Info:</div>
+          <div>Using Firestore Service for data storage</div>
+          <div>Data structure: Student + HealthRecord + Session</div>
+          <div>Check console for detailed logs</div>
+        </div>
+      )}
     </div>
   );
 }

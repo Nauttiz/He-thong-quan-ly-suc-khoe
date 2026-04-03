@@ -12,27 +12,46 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
     school: '',
     date: new Date().toISOString().split('T')[0]
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newSession: Session = {
-      id: crypto.randomUUID(),
-      code: session.code,
-      name: session.name,
-      school: session.school,
-      date: new Date(session.date).toISOString(),
-      createdAt: new Date().toISOString()
-    };
+    if (isSubmitting) return;
+    
+    try {
+      setIsSubmitting(true);
+      console.log('📝 Creating session with data:', session);
+      
+      const newSession: Session = {
+        id: '', // Will be set by Firestore
+        code: session.code,
+        name: session.name,
+        school: session.school,
+        date: session.date, // Keep as YYYY-MM-DD format
+        createdAt: new Date().toISOString()
+      };
 
-    onSessionCreated?.(newSession);
+      console.log('🚀 Calling onSessionCreated with:', newSession);
+      await onSessionCreated?.(newSession);
+      
+      console.log('✅ Session created successfully');
 
-    setSession({
-      code: '',
-      name: '',
-      school: '',
-      date: new Date().toISOString().split('T')[0]
-    });
+      // Reset form
+      setSession({
+        code: '',
+        name: '',
+        school: '',
+        date: new Date().toISOString().split('T')[0]
+      });
+      
+    } catch (error) {
+      console.error('❌ Error in CreateSession:', error);
+      alert('Có lỗi khi tạo phiên: ' + (error as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -50,6 +69,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
             className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="VD: P001, BMI2025_Q1"
             required
+            disabled={isSubmitting}
           />
           <p className="text-xs text-gray-500 mt-1">Mã định danh duy nhất cho phiên đo</p>
         </div>
@@ -64,6 +84,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
             className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="VD: Đo BMI Học kỳ 1 năm 2025"
             required
+            disabled={isSubmitting}
           />
         </div>
 
@@ -79,6 +100,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="VD: Trường THCS Nguyễn Huệ"
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -91,6 +113,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
               onChange={(e) => setSession(s => ({...s, date: e.target.value}))}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -98,11 +121,16 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
         {/* Submit button - Lớn hơn trên mobile */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-4 lg:py-3 px-6 rounded-xl hover:bg-blue-700 active:bg-blue-800 transition-colors font-medium text-base lg:text-sm shadow-lg hover:shadow-xl"
+          disabled={isSubmitting}
+          className={`w-full py-4 lg:py-3 px-6 rounded-xl transition-colors font-medium text-base lg:text-sm shadow-lg hover:shadow-xl ${
+            isSubmitting 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white'
+          }`}
         >
           <span className="flex items-center justify-center">
-            <span className="mr-2">🆕</span>
-            Tạo phiên nhập liệu
+            <span className="mr-2">{isSubmitting ? '⏳' : '🆕'}</span>
+            {isSubmitting ? 'Đang tạo...' : 'Tạo phiên nhập liệu'}
           </span>
         </button>
       </form>

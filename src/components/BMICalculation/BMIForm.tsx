@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Session, Student, HealthRecord } from '../../types/interfaces';
-import { calculateWHOZScore, getZScoreSimpleName } from '../../utils/whoZScoreData'; // ← Import WHO functions
+import { calculateWHOZScore, getZScoreSimpleName } from '../../utils/whoZScoreData'; 
 
 interface BMIFormProps {
   selectedSession: Session;
@@ -56,25 +56,33 @@ export default function BMIForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
+    if (isSubmitting) return;
 
     try {
+      setIsSubmitting(true);
+      console.log('📏 BMIForm: Starting submission...');
+
       const heightNum = parseFloat(height);
       const weightNum = parseFloat(weight);
       const waistNum = waist ? parseFloat(waist) : undefined;
       const systolicNum = systolic ? parseInt(systolic) : undefined;
       const diastolicNum = diastolic ? parseInt(diastolic) : undefined;
 
+      if (!heightNum || !weightNum) {
+        throw new Error('Chiều cao và cân nặng là bắt buộc');
+      }
+
       const bmi = calculateBMI(heightNum, weightNum);
       const currentYear = new Date().getFullYear();
       const age = currentYear - selectedStudent.birthYear;
       
-      // ← Sử dụng WHO Z-Score calculation
+      // Sử dụng WHO Z-Score calculation
       const zScore = Math.round(calculateWHOZScore(bmi, age, selectedStudent.gender) * 100) / 100;
       const bmr = calculateBMR(weightNum, heightNum, age, selectedStudent.gender);
 
       const healthRecord: HealthRecord = {
-        id: editingRecord?.id || `record_${Date.now()}`,
+        id: '', // Will be set by Firestore (or keep existing ID for updates)
         sessionId: selectedSession.id,
         studentId: selectedStudent.id,
         studentName: selectedStudent.name,
@@ -95,8 +103,12 @@ export default function BMIForm({
         updatedAt: new Date().toISOString()
       };
 
-      onHealthRecordCreated(healthRecord);
+      console.log('🚀 BMIForm: Calling onHealthRecordCreated with:', healthRecord);
+      await onHealthRecordCreated(healthRecord); // thêm await để đảm bảo hoàn thành
 
+      console.log('✅ BMIForm: Health record saved successfully');
+
+      // Reset form only if not editing
       if (!editingRecord) {
         setHeight('');
         setWeight('');
@@ -105,15 +117,16 @@ export default function BMIForm({
         setDiastolic('');
         setNotes('');
       }
+
     } catch (error) {
-      console.error('Error creating health record:', error);
-      alert('Có lỗi xảy ra khi lưu kết quả đo!');
+      console.error('❌ BMIForm: Error creating health record:', error);
+      alert('Có lỗi xảy ra khi lưu kết quả đo: ' + (error as Error).message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ← Function để get WHO classification đơn giản
+  // Function để get WHO classification đơn giản
   const getZScoreClassification = (zScore: number) => {
     const classification = getZScoreSimpleName(zScore);
     let color = 'blue';
@@ -130,7 +143,7 @@ export default function BMIForm({
     <div className="bg-white rounded-2xl lg:rounded-3xl shadow-sm p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4 lg:mb-6">
         <h2 className="text-xl lg:text-2xl font-bold">
-          {editingRecord ? '✏️ Chỉnh sửa kết quả đo' : '📏 Nhập thông số đo'}
+          {editingRecord ? '✏️ Chỉnh sửa kết quả đo' : 'Nhập thông số đo'}
         </h2>
         {editingRecord && (
           <div className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full">
@@ -154,7 +167,8 @@ export default function BMIForm({
               value={height}
               onChange={(e) => setHeight(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="Ví dụ: 150.5"
             />
           </div>
@@ -171,7 +185,8 @@ export default function BMIForm({
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="Ví dụ: 45.2"
             />
           </div>
@@ -190,7 +205,8 @@ export default function BMIForm({
               max="150"
               value={waist}
               onChange={(e) => setWaist(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="Ví dụ: 70.5"
             />
           </div>
@@ -205,7 +221,8 @@ export default function BMIForm({
               max="200"
               value={systolic}
               onChange={(e) => setSystolic(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="Ví dụ: 120"
             />
           </div>
@@ -220,7 +237,8 @@ export default function BMIForm({
               max="120"
               value={diastolic}
               onChange={(e) => setDiastolic(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="Ví dụ: 80"
             />
           </div>
@@ -235,12 +253,13 @@ export default function BMIForm({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
+            disabled={isSubmitting}
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
             placeholder="Ghi chú về tình trạng sức khỏe, khuyến nghị..."
           />
         </div>
 
-        {/* ← Enhanced BMI Preview với WHO classification đơn giản */}
+        {/* Enhanced BMI Preview với WHO classification đơn giản */}
         {height && weight && (
           (() => {
             const bmi = calculateBMI(parseFloat(height), parseFloat(weight));
@@ -314,13 +333,13 @@ export default function BMIForm({
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitting}
-            className={`px-6 py-3 rounded-xl font-medium transition-colors ${
-              isSubmitting
+            disabled={isSubmitting || !height || !weight}
+            className={`px-6 py-3 rounded-xl font-medium transition-colors shadow-lg ${
+              isSubmitting || !height || !weight
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : editingRecord
-                ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-yellow-600 hover:bg-yellow-700 text-white hover:shadow-xl'
+                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl'
             }`}
           >
             {isSubmitting

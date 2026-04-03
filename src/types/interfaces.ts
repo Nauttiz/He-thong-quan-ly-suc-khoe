@@ -13,9 +13,10 @@ export interface Student {
   name: string;
   birthYear: number;
   class: string;
-  school: string;
-  address: string;
+  school?: string;
+  address?: string;
   gender: 'male' | 'female';
+  sessionId?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -37,6 +38,7 @@ export interface HealthRecord {
   };
   bmi: number;
   zScore?: number;
+  zScoreValue?: number;
   bmr?: number;
   photoUrl?: string; // URL ảnh chụp
   notes?: string;

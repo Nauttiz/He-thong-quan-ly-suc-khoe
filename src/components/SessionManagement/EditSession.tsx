@@ -1,172 +1,159 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Session } from '../../types/interfaces';
 
 interface EditSessionProps {
-  session: Session | null;
-  onSessionUpdate: (session: Session) => void;
-  onClose: () => void;
+  session: Session;
+  onSave: (updatedSession: Session) => Promise<void>; // Add onSave
+  onCancel: () => void;
 }
 
-export default function EditSession({ session, onSessionUpdate, onClose }: EditSessionProps) {
+export default function EditSession({ session, onSave, onCancel }: EditSessionProps) {
   const [formData, setFormData] = useState({
-    code: '',
-    name: '',
-    date: '',
-    school: ''
+    code: session.code || '',
+    name: session.name || '',
+    date: session.date || '',
+    school: session.school || ''
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (session) {
-      setFormData({
-        code: session.code,
-        name: session.name,
-        date: session.date,
-        school: session.school
-      });
-      setErrors({});
-    }
-  }, [session]);
-
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.code.trim()) {
-      newErrors.code = 'Vui lòng nhập mã phiên';
-    }
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Vui lòng nhập tên phiên';
-    }
-
-    if (!formData.date) {
-      newErrors.date = 'Vui lòng chọn ngày đo';
-    }
-
-    if (!formData.school.trim()) {
-      newErrors.school = 'Vui lòng nhập tên trường';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!session || !validateForm()) return;
+    if (!formData.name.trim() || !formData.school.trim()) {
+      alert('Vui lòng điền đầy đủ thông tin!');
+      return;
+    }
 
-    const updatedSession: Session = {
-      ...session,
-      code: formData.code.trim(),
-      name: formData.name.trim(),
-      date: formData.date,
-      school: formData.school.trim(),
-      updatedAt: new Date().toISOString() // ← Auto set updatedAt
-    };
+    try {
+      setIsSaving(true);
+      
+      const updatedSession: Session = {
+        ...session,
+        code: formData.code.trim(),
+        name: formData.name.trim(),
+        date: formData.date || new Date().toISOString().split('T')[0],
+        school: formData.school.trim(),
+        updatedAt: new Date().toISOString()
+      };
 
-    onSessionUpdate(updatedSession);
-    onClose();
+      await onSave(updatedSession); // Use onSave prop
+      
+    } catch (error) {
+      console.error('Error updating session:', error);
+      alert('Có lỗi khi cập nhật phiên đo!');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  if (!session) return null;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">✏️ Chỉnh sửa phiên đo</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">✏️ Chỉnh sửa phiên đo</h3>
             <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 text-2xl"
+              onClick={onCancel}
+              disabled={isSaving}
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
             >
               ×
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Mã phiên */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                🔖 Mã phiên *
+                Mã phiên
               </label>
               <input
                 type="text"
+                name="code"
                 value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                className={`w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-500 ${
-                  errors.code ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Ví dụ: KSK2024-001"
+                onChange={handleChange}
+                placeholder="VD: HK1-2025"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              {errors.code && <p className="text-red-500 text-sm mt-1">{errors.code}</p>}
             </div>
 
-            {/* Tên phiên */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                📝 Tên phiên đo *
+                Tên phiên đo *
               </label>
               <input
                 type="text"
+                name="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={`w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-500 ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Ví dụ: Khám sức khỏe đầu năm học 2024-2025"
+                onChange={handleChange}
+                placeholder="VD: Khám sức khỏe HK1 2024-2025"
+                required
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
-            {/* Ngày đo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Ngày đo *
+                📅 Ngày thực hiện
               </label>
               <input
                 type="date"
+                name="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className={`w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-500 ${
-                  errors.date ? 'border-red-500' : 'border-gray-300'
-                }`}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
             </div>
 
-            {/* Trường */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                🏫 Tên trường *
+                Trường học *
               </label>
               <input
                 type="text"
+                name="school"
                 value={formData.school}
-                onChange={(e) => setFormData({ ...formData, school: e.target.value })}
-                className={`w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-500 ${
-                  errors.school ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Ví dụ: TH Vĩnh Trường"
+                onChange={handleChange}
+                placeholder="VD: Trường THCS Cao Văn Bé"
+                required
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              {errors.school && <p className="text-red-500 text-sm mt-1">{errors.school}</p>}
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3 pt-4">
               <button
-                type="submit"
-                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                type="button"
+                onClick={onCancel}
+                disabled={isSaving}
+                className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+                  isSaving 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                💾 Lưu thay đổi
+                Hủy
               </button>
               <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-xl hover:bg-gray-700 transition-colors font-medium"
+                type="submit"
+                disabled={isSaving || !formData.name.trim() || !formData.school.trim()}
+                className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+                  isSaving || !formData.name.trim() || !formData.school.trim()
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
-                ❌ Hủy
+                {isSaving ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="animate-spin">⏳</span>
+                    Đang lưu...
+                  </span>
+                ) : (
+                  '💾 Lưu thay đổi'
+                )}
               </button>
             </div>
           </form>
