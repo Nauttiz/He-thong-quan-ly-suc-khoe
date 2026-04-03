@@ -253,13 +253,13 @@ export default function StudentList({
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">👤 Họ tên</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">🏫 Lớp</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">👫 Giới tính</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">🎂 Tuổi</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">🏫 Trường</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">📍 Địa chỉ</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">⚙️ Thao tác</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Họ tên</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Lớp</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Giới tính</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Tuổi</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Trường</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Địa chỉ</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

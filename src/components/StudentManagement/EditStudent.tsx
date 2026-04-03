@@ -101,7 +101,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                👤 Họ và tên *
+                Họ và tên *
               </label>
               <input
                 type="text"
@@ -116,7 +116,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                🎂 Năm sinh *
+                Năm sinh *
               </label>
               <input
                 type="number"
@@ -134,7 +134,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                🏫 Lớp *
+                Lớp *
               </label>
               <input
                 type="text"
@@ -149,7 +149,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                👫 Giới tính *
+                Giới tính *
               </label>
               <select
                 value={editedStudent.gender}
@@ -167,7 +167,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
           {/* Optional Fields */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              🏫 Trường <span className="text-gray-500">(không bắt buộc)</span>
+              Trường <span className="text-gray-500">(không bắt buộc)</span>
             </label>
             <input
               type="text"
@@ -181,7 +181,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              📍 Địa chỉ <span className="text-gray-500">(không bắt buộc)</span>
+              Địa chỉ <span className="text-gray-500">(không bắt buộc)</span>
             </label>
             <textarea
               value={editedStudent.address || ''}

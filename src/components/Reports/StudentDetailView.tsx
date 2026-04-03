@@ -245,8 +245,8 @@ export default function StudentDetailView({
                       <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">BMI</th>
                       <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Z-Score</th>
                       <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Phân loại</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">🔄 Vòng eo</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">🩸 Huyết áp</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Vòng eo</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Huyết áp</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

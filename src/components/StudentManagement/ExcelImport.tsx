@@ -250,7 +250,8 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       const addedStudents: Student[] = [];
       for (const studentData of studentsToAdd) {
         try {
-          const addedStudent = await studentsService.create(studentData);
+          const newId = await studentsService.add(studentData);
+          const addedStudent: Student = { id: newId, ...studentData };
           addedStudents.push(addedStudent);
           console.log('✅ Added student:', addedStudent.name, 'with ID:', addedStudent.id);
         } catch (error) {

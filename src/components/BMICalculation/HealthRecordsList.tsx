@@ -318,8 +318,8 @@ export default function HealthRecordsList({
                             <h3 className="font-bold text-lg text-gray-900">{record.studentName}</h3>
                           </div>
                           <div className="text-sm text-gray-600 space-y-1">
-                            <p>🏫 Lớp: {studentInfo.class}</p>
-                            <p>👤 Tuổi: {calculateAge(studentInfo.birthYear)} ({studentInfo.gender === 'male' ? 'Nam' : 'Nữ'})</p>
+                            <p>Lớp: {studentInfo.class}</p>
+                            <p>Tuổi: {calculateAge(studentInfo.birthYear)} ({studentInfo.gender === 'male' ? 'Nam' : 'Nữ'})</p>
                           </div>
                         </div>
                         {record.zScore && (
@@ -332,19 +332,19 @@ export default function HealthRecordsList({
                       {/* existing content */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div className="bg-blue-50 p-3 rounded-lg">
-                          <div className="text-xs text-blue-600 mb-1">📏 Chiều cao</div>
+                          <div className="text-xs text-blue-600 mb-1">Chiều cao</div>
                           <div className="text-lg font-bold text-blue-700">{record.height} cm</div>
                         </div>
                         <div className="bg-orange-50 p-3 rounded-lg">
-                          <div className="text-xs text-orange-600 mb-1">⚖️ Cân nặng</div>
+                          <div className="text-xs text-orange-600 mb-1">Cân nặng</div>
                           <div className="text-lg font-bold text-orange-700">{record.weight} kg</div>
                         </div>
                         <div className="bg-green-50 p-3 rounded-lg">
-                          <div className="text-xs text-green-600 mb-1">📊 BMI</div>
+                          <div className="text-xs text-green-600 mb-1">BMI</div>
                           <div className="text-lg font-bold text-green-700">{record.bmi}</div>
                         </div>
                         <div className="bg-pink-50 p-3 rounded-lg">
-                          <div className="text-xs text-pink-600 mb-1">🔄 Vòng eo</div>
+                          <div className="text-xs text-pink-600 mb-1">Vòng eo</div>
                           <div className="text-lg font-bold text-pink-700">
                             {record.waist ? `${record.waist} cm` : 'Chưa đo'}
                           </div>
@@ -355,7 +355,7 @@ export default function HealthRecordsList({
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           {record.bloodPressure && (
                             <div className="bg-indigo-50 p-3 rounded-lg">
-                              <div className="text-xs text-indigo-600 mb-1">🩸 Huyết áp</div>
+                              <div className="text-xs text-indigo-600 mb-1">Huyết áp</div>
                               <div className="text-lg font-bold text-indigo-700">
                                 {record.bloodPressure.systolic}/{record.bloodPressure.diastolic}
                               </div>
@@ -363,7 +363,7 @@ export default function HealthRecordsList({
                           )}
                           {record.zScore && (
                             <div className="bg-purple-50 p-3 rounded-lg">
-                              <div className="text-xs text-purple-600 mb-1">📈 Z-Score</div>
+                              <div className="text-xs text-purple-600 mb-1">Z-Score</div>
                               <div className="text-lg font-bold text-purple-700">{record.zScore}</div>
                               <div className="text-xs text-gray-500 mt-1">{getZScoreSimpleName(record.zScore)}</div>
                             </div>
@@ -417,15 +417,15 @@ export default function HealthRecordsList({
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">STT</th>
-                      <th className="px-4 py-4 text-left text-sm font-medium text-gray-500">👤 Họ và tên</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">🏫 Lớp</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">📏 Chiều cao (cm)</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">⚖️ Cân nặng (kg)</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">📊 BMI</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">🔄 Vòng eo (cm)</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">🩸 Huyết áp (mmHg)</th>
-                      <th className="px-4 py-4 text-center text-sm font-medium text-gray-500">📈 Z-Score, Ghi chú - Tư vấn</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">⚙️ Thao tác</th>
+                      <th className="px-4 py-4 text-left text-sm font-medium text-gray-500">Họ và tên</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Lớp</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Chiều cao (cm)</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Cân nặng (kg)</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">BMI</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Vòng eo (cm)</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Huyết áp (mmHg)</th>
+                      <th className="px-4 py-4 text-center text-sm font-medium text-gray-500">Z-Score, Ghi chú - Tư vấn</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

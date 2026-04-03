@@ -126,7 +126,7 @@ export default function BMIForm({
     }
   };
 
-  // Function để get WHO classification đơn giản
+  // Function that get WHO classification simple
   const getZScoreClassification = (zScore: number) => {
     const classification = getZScoreSimpleName(zScore);
     let color = 'blue';
@@ -157,7 +157,7 @@ export default function BMIForm({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              📏 Chiều cao (cm) *
+              Chiều cao (cm) *
             </label>
             <input
               type="number"
@@ -175,7 +175,7 @@ export default function BMIForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              ⚖️ Cân nặng (kg) *
+              Cân nặng (kg) *
             </label>
             <input
               type="number"
@@ -196,7 +196,7 @@ export default function BMIForm({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              🔄 Vòng eo (cm)
+              Vòng eo (cm)
             </label>
             <input
               type="number"
@@ -213,7 +213,7 @@ export default function BMIForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              🩸 Huyết áp tâm thu (mmHg)
+              Huyết áp tâm thu (mmHg)
             </label>
             <input
               type="number"
@@ -229,7 +229,7 @@ export default function BMIForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              🩸 Huyết áp tâm trương (mmHg)
+              Huyết áp tâm trương (mmHg)
             </label>
             <input
               type="number"

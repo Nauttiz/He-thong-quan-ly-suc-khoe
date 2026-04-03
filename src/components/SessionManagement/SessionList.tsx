@@ -57,7 +57,7 @@ export default function SessionList({
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">📋 Danh sách phiên đo</h2>
+        <h2 className="text-xl font-bold">Danh sách phiên đo</h2>
         <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
           Tổng: {sessions.length} phiên
         </div>
