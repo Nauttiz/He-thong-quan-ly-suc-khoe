@@ -282,7 +282,7 @@ export default function StudentList({
                             ? 'bg-blue-100 text-blue-800' 
                             : 'bg-pink-100 text-pink-800'
                         }`}>
-                          {student.gender === 'male' ? '👦 Nam' : '👧 Nữ'}
+                          {student.gender === 'male' ? 'Nam' : 'Nữ'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center text-sm text-gray-600">

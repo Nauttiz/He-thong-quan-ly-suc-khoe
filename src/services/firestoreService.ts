@@ -44,8 +44,8 @@ export const healthRecordsService = {
       const snapshot = await getDocs(q);
       
       const records = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+        ...doc.data(),
+        id: doc.id
       })) as HealthRecord[];
       
       console.log(`✅ Fetched ${records.length} health records`);
@@ -131,8 +131,8 @@ export const sessionsService = {
       const snapshot = await getDocs(q);
       
       const sessions = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+        ...doc.data(),
+        id: doc.id
       })) as Session[];
       
       console.log(`✅ Fetched ${sessions.length} sessions`);
@@ -220,8 +220,8 @@ export const studentsService = {
       const snapshot = await getDocs(q);
       
       const students = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+        ...doc.data(),
+        id: doc.id
       })) as Student[];
       
       console.log(`✅ Fetched ${students.length} students`);

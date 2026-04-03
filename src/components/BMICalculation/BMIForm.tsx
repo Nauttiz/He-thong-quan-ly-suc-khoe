@@ -5,7 +5,7 @@ import { calculateWHOZScore, getZScoreSimpleName } from '../../utils/whoZScoreDa
 interface BMIFormProps {
   selectedSession: Session;
   selectedStudent: Student;
-  onHealthRecordCreated: (record: HealthRecord) => void;
+  onHealthRecordCreated: (record: Omit<HealthRecord, 'id'>) => void;
   editingRecord?: HealthRecord | null;
 }
 
@@ -81,8 +81,7 @@ export default function BMIForm({
       const zScore = Math.round(calculateWHOZScore(bmi, age, selectedStudent.gender) * 100) / 100;
       const bmr = calculateBMR(weightNum, heightNum, age, selectedStudent.gender);
 
-      const healthRecord: HealthRecord = {
-        id: '', // Will be set by Firestore (or keep existing ID for updates)
+      const healthRecord = {
         sessionId: selectedSession.id,
         studentId: selectedStudent.id,
         studentName: selectedStudent.name,
