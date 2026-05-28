@@ -48,7 +48,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
       
     } catch (error) {
       console.error('❌ Error in CreateSession:', error);
-      alert('Có lỗi khi tạo phiên: ' + (error as Error).message);
+      alert('Error creating session: ' + (error as Error).message);
     } finally {
       setIsSubmitting(false);
     }
@@ -56,12 +56,12 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
 
   return (
     <div className="bg-white rounded-2xl lg:rounded-3xl shadow-sm p-4 lg:p-6">
-      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">Tạo phiên nhập liệu mới</h2>
+      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">Create New Session</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
         {/* Mã phiên */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Mã phiên *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Session Code *</label>
           <input
             type="text"
             value={session.code}
@@ -71,18 +71,18 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
             required
             disabled={isSubmitting}
           />
-          <p className="text-xs text-gray-500 mt-1">Mã định danh duy nhất cho phiên đo</p>
+          <p className="text-xs text-gray-500 mt-1">Unique identifier for the session</p>
         </div>
 
         {/* Tên phiên */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tên phiên *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Session Name *</label>
           <input
             type="text"
             value={session.name}
             onChange={(e) => setSession(s => ({...s, name: e.target.value}))}
             className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="VD: Đo BMI Học kỳ 1 năm 2025"
+            placeholder="e.g. BMI Semester 1 2025"
             required
             disabled={isSubmitting}
           />
@@ -92,13 +92,13 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Trường */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Trường *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">School *</label>
             <input
               type="text"
               value={session.school}
               onChange={(e) => setSession(s => ({...s, school: e.target.value}))}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="VD: Trường THCS Nguyễn Huệ"
+              placeholder="e.g. ABC Secondary School"
               required
               disabled={isSubmitting}
             />
@@ -106,7 +106,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
 
           {/* Ngày đo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Ngày đo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Measurement Date *</label>
             <input
               type="date"
               value={session.date}
@@ -130,7 +130,7 @@ export default function CreateSession({ onSessionCreated }: CreateSessionProps) 
         >
           <span className="flex items-center justify-center">
             <span className="mr-2">{isSubmitting ? '⏳' : '🆕'}</span>
-            {isSubmitting ? 'Đang tạo...' : 'Tạo phiên nhập liệu'}
+            {isSubmitting ? 'Creating...' : 'Create Session'}
           </span>
         </button>
       </form>

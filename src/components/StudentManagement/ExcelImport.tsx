@@ -70,7 +70,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
           
           if (jsonData.length < 2) {
-            reject(new Error('File Excel phải có ít nhất 2 dòng (header + data)'));
+            reject(new Error('Excel file must have at least 2 rows (header + data)'));
             return;
           }
 
@@ -89,11 +89,11 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
 
           resolve(parsedData);
         } catch (error) {
-          reject(new Error('Không thể đọc file Excel. Vui lòng kiểm tra định dạng file.'));
+          reject(new Error('Cannot read Excel file. Please check the file format.'));
         }
       };
 
-      reader.onerror = () => reject(new Error('Lỗi khi đọc file'));
+      reader.onerror = () => reject(new Error('Error reading file'));
       reader.readAsArrayBuffer(file);
     });
   };
@@ -150,23 +150,23 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
 
       // Validation
       if (!name) {
-        errors.push(`Dòng ${rowNum}: Thiếu họ tên`);
+        errors.push(`Row ${rowNum}: Missing name`);
         continue;
       }
 
       if (!className) {
-        errors.push(`Dòng ${rowNum}: Thiếu lớp`);
+        errors.push(`Row ${rowNum}: Missing class`);
         continue;
       }
 
       if (!genderStr || (!genderStr.includes('nam') && !genderStr.includes('nữ') && !genderStr.includes('male') && !genderStr.includes('female'))) {
-        errors.push(`Dòng ${rowNum}: Giới tính phải là "Nam" hoặc "Nữ"`);
+        errors.push(`Row ${rowNum}: Gender must be "Nam" or "Nữ" (or "Male"/"Female")`);
         continue;
       }
 
       // Birth year validation for 2008-2015 range
       if (!birthYear || isNaN(birthYear) || birthYear < 2008 || birthYear > 2015) {
-        errors.push(`Dòng ${rowNum}: Năm sinh không hợp lệ (2008-2015)`);
+        errors.push(`Row ${rowNum}: Invalid birth year (2008-2015)`);
         continue;
       }
 
@@ -177,13 +177,13 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         class: className,
         gender,
         birthYear,
-        address: address || 'Chưa cập nhật',
+        address: address || 'Not updated',
         school: school || ''
       });
     }
 
     if (errors.length > 0) {
-      throw new Error(`Có ${errors.length} lỗi:\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n...' : ''}`);
+      throw new Error(`${errors.length} error(s) found:\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n...' : ''}`);
     }
 
     return validatedData;
@@ -201,12 +201,12 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
     ];
     
     if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
-      setError('Chỉ hỗ trợ file Excel (.xlsx, .xls) hoặc CSV');
+      setError('Only Excel (.xlsx, .xls) or CSV files are supported');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError('File quá lớn. Vui lòng chọn file nhỏ hơn 10MB');
+      setError('File too large. Please select a file smaller than 10MB');
       return;
     }
 
@@ -222,7 +222,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       console.log('📊 Parsed Excel data:', rawData.length, 'rows');
       
       if (rawData.length === 0) {
-        throw new Error('File Excel không có dữ liệu');
+        throw new Error('Excel file has no data');
       }
 
       // Validate and normalize
@@ -230,7 +230,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       console.log('✅ Validated data:', validatedData.length, 'valid rows');
       
       if (validatedData.length === 0) {
-        throw new Error('Không có dữ liệu hợp lệ trong file');
+        throw new Error('No valid data found in file');
       }
 
       // Prepare students for Firestore (WITHOUT ID)
@@ -268,7 +268,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       }
       
       // Show success message
-      setSuccessMessage(`✅ Import thành công ${addedStudents.length} học sinh vào Firestore!`);
+      setSuccessMessage(`✅ Successfully imported ${addedStudents.length} students to Firestore!`);
       setIsProcessing(false);
       
       // Reset file input
@@ -281,7 +281,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       
     } catch (error) {
       console.error('❌ Import error:', error);
-      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi import');
+      setError(error instanceof Error ? error.message : 'An error occurred during import');
       setIsProcessing(false);
     }
   };
@@ -308,7 +308,7 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
 
   return (
     <div className="bg-white rounded-2xl lg:rounded-3xl shadow-sm p-4 lg:p-6">
-      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">Import học sinh từ Excel</h2>
+      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">Import Students from Excel</h2>
 
       {/* File Upload Area */}
       <div
@@ -332,21 +332,21 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         {isProcessing ? (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-            <span className="text-lg">Đang import vào Firestore...</span>
+            <span className="text-lg">Importing to Firestore...</span>
           </div>
         ) : (
           <>
             <div className="text-6xl mb-4">📊</div>
-            <p className="text-lg font-medium mb-2">Kéo thả file Excel vào đây</p>
-            <p className="text-gray-500 mb-4">hoặc</p>
+            <p className="text-lg font-medium mb-2">Drag & drop an Excel file here</p>
+            <p className="text-gray-500 mb-4">or</p>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium"
             >
-              Chọn file từ máy tính
+              Choose file from computer
             </button>
             <p className="text-sm text-gray-500 mt-4">
-              Hỗ trợ: .xlsx, .xls, .csv (tối đa 10MB)
+              Supported: .xlsx, .xls, .csv (max 10MB)
             </p>
           </>
         )}
@@ -368,16 +368,16 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
 
       {/* Template Download */}
       <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-        <h3 className="font-medium mb-2">📋 Mẫu file Excel:</h3>
+        <h3 className="font-medium mb-2">📋 Excel Template:</h3>
         <p className="text-sm text-gray-600 mb-3">
-          File Excel cần có các cột: <strong>Họ và tên, Lớp, Giới tính, Năm sinh, Địa chỉ</strong><br/>
-          <em>Năm sinh hợp lệ: 2008-2015</em>
+          Excel file must have columns: <strong>Họ và tên, Lớp, Giới tính, Năm sinh, Địa chỉ</strong><br/>
+          <em>Valid birth years: 2008-2015</em>
         </p>
         <button 
           onClick={downloadTemplate}
           className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm"
         >
-          📥 Tải mẫu Excel
+          📥 Download Template
         </button>
       </div>
 

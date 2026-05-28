@@ -49,7 +49,7 @@ export default function StudentList({
   };
 
   const handleDelete = async (studentId: string) => {
-    if (!window.confirm('Bạn có chắc muốn xóa học sinh này?')) {
+    if (!window.confirm('Are you sure you want to delete this student?')) {
       return;
     }
 
@@ -64,7 +64,7 @@ export default function StudentList({
       console.log('✅ StudentList: Student deleted successfully');
     } catch (error) {
       console.error('❌ StudentList: Error deleting student:', error);
-      alert('Có lỗi khi xóa học sinh: ' + (error as Error).message);
+      alert('Error deleting student: ' + (error as Error).message);
     } finally {
       setIsDeleting(null);
     }
@@ -72,7 +72,7 @@ export default function StudentList({
 
   const handleDeleteAll = async () => {
     if (!window.confirm(
-      `🚨 CẢNH BÁO!\n\nBạn sắp xóa TẤT CẢ ${students.length} học sinh!\n\nThao tác này KHÔNG THỂ HOÀN TÁC!\n\nBạn có chắc chắn?`
+      `🚨 WARNING!\n\nYou are about to delete ALL ${students.length} students!\n\nThis action CANNOT BE UNDONE!\n\nAre you sure?`
     )) {
       return;
     }
@@ -83,7 +83,7 @@ export default function StudentList({
       console.log('✅ StudentList: All students deleted successfully');
     } catch (error) {
       console.error('❌ StudentList: Error deleting all students:', error);
-      alert('Có lỗi khi xóa tất cả học sinh: ' + (error as Error).message);
+      alert('Error deleting all students: ' + (error as Error).message);
     }
   };
 
@@ -93,7 +93,7 @@ export default function StudentList({
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h2 className="text-xl lg:text-2xl font-bold">
-            👥 Danh sách học sinh ({students.length})
+            👥 Student List ({students.length})
           </h2>
           
           <div className="flex flex-col sm:flex-row gap-3">
@@ -101,7 +101,7 @@ export default function StudentList({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Tìm kiếm học sinh..."
+                placeholder="Search students..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -116,10 +116,10 @@ export default function StudentList({
               <button
                 onClick={handleDeleteAll}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm hover:shadow-md flex items-center gap-2"
-                title="Xóa tất cả học sinh"
+                title="Delete all students"
               >
                 <span>🗑️</span>
-                <span className="hidden sm:inline">Xóa tất cả</span>
+                <span className="hidden sm:inline">Delete All</span>
               </button>
             )}
           </div>
@@ -128,28 +128,28 @@ export default function StudentList({
         {/* Filters */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">🏫 Lọc theo lớp</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">🏫 Filter by Class</label>
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Tất cả lớp</option>
+              <option value="">All Classes</option>
               {classes.map(cls => (
                 <option key={cls} value={cls}>{cls}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">👫 Lọc theo giới tính</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">👫 Filter by Gender</label>
             <select
               value={filterGender}
               onChange={(e) => setFilterGender(e.target.value)}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Tất cả</option>
-              <option value="male">Nam</option>
-              <option value="female">Nữ</option>
+              <option value="">All</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
             </select>
           </div>
         </div>
@@ -158,11 +158,11 @@ export default function StudentList({
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">👥</div>
             <p className="text-gray-500 text-lg">
-              {students.length === 0 ? 'Chưa có học sinh nào' : 'Không tìm thấy học sinh phù hợp'}
+              {students.length === 0 ? 'No students yet' : 'No matching students found'}
             </p>
             {students.length === 0 && (
               <p className="text-gray-400 text-sm mt-2">
-                Hãy thêm học sinh mới để bắt đầu
+                Add new students to get started
               </p>
             )}
           </div>
@@ -183,8 +183,8 @@ export default function StudentList({
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-gray-900">{student.name}</h3>
                       <p className="text-sm text-gray-600">
-                        🏫 Lớp {student.class} • {student.gender === 'male' ? '👦 Nam' : '👧 Nữ'} • 
-                        🎂 {currentYear - student.birthYear} tuổi
+                        🏫 Class {student.class} • {student.gender === 'male' ? '👦 Male' : '👧 Female'} • 
+                        🎂 {currentYear - student.birthYear} yrs old
                       </p>
                     </div>
                     <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
@@ -196,7 +196,7 @@ export default function StudentList({
                     {/* ← UPDATED: Handle optional school field */}
                     <div className="flex items-center text-sm text-gray-600">
                       <span className="mr-2">🏫</span>
-                      <span>{student.school || <em className="text-gray-400">Chưa có thông tin trường</em>}</span>
+                      <span>{student.school || <em className="text-gray-400">No school info</em>}</span>
                     </div>
                     
                     {/* ← UPDATED: Only show address if it exists */}
@@ -217,7 +217,7 @@ export default function StudentList({
                           : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                       }`}
                     >
-                      {selectedStudentId === student.id ? '✓ Đã chọn' : '📋 Chọn HS'}
+                      {selectedStudentId === student.id ? '✓ Selected' : '📋 Select'}
                     </button>
                     <div className="flex gap-1">
                       <button
@@ -253,13 +253,13 @@ export default function StudentList({
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Họ tên</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Lớp</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Giới tính</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Tuổi</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Trường</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Địa chỉ</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Thao tác</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Full Name</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Class</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Gender</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Age</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">School</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Address</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -282,7 +282,7 @@ export default function StudentList({
                             ? 'bg-blue-100 text-blue-800' 
                             : 'bg-pink-100 text-pink-800'
                         }`}>
-                          {student.gender === 'male' ? 'Nam' : 'Nữ'}
+                          {student.gender === 'male' ? 'Male' : 'Female'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center text-sm text-gray-600">
@@ -290,13 +290,13 @@ export default function StudentList({
                       </td>
                       {/* ← UPDATED: Handle optional school field */}
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {student.school || <span className="text-gray-400 italic">Chưa có</span>}
+                        {student.school || <span className="text-gray-400 italic">N/A</span>}
                       </td>
                       {/* ← UPDATED: Handle optional address field */}
                       <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                         {student.address && student.address.trim() 
                           ? <span title={student.address}>{student.address}</span>
-                          : <span className="text-gray-400 italic">Chưa có</span>
+                          : <span className="text-gray-400 italic">N/A</span>
                         }
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -309,7 +309,7 @@ export default function StudentList({
                                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                             }`}
                           >
-                            {selectedStudentId === student.id ? '✓' : 'Chọn'}
+                            {selectedStudentId === student.id ? '✓' : 'Select'}
                           </button>
                           <button
                             onClick={() => handleEdit(student)}
@@ -320,7 +320,7 @@ export default function StudentList({
                                 : 'bg-yellow-600 text-white hover:bg-yellow-700'
                             }`}
                           >
-                            {isDeleting === student.id ? '⏳' : 'Sửa'}
+                            {isDeleting === student.id ? '⏳' : 'Edit'}
                           </button>
                           <button
                             onClick={() => handleDelete(student.id)}
@@ -331,7 +331,7 @@ export default function StudentList({
                                 : 'bg-red-600 text-white hover:bg-red-700'
                             }`}
                           >
-                            {isDeleting === student.id ? '⏳' : 'Xóa'}
+                            {isDeleting === student.id ? '⏳' : 'Delete'}
                           </button>
                         </div>
                       </td>

@@ -69,11 +69,11 @@ export default function HealthRecordsList({
     // ADD: Validate ID before attempting delete
     if (!recordId || recordId.trim() === '') {
       console.error('❌ Cannot delete record: Invalid ID');
-      alert('❌ Không thể xóa: ID không hợp lệ');
+      alert('❌ Cannot delete: Invalid ID');
       return;
     }
 
-    if (!window.confirm('Bạn có chắc muốn xóa kết quả đo này?')) {
+    if (!window.confirm('Are you sure you want to delete this measurement?')) {
       return;
     }
 
@@ -88,7 +88,7 @@ export default function HealthRecordsList({
       console.log('✅ HealthRecordsList: Record deleted successfully');
     } catch (error) {
       console.error('❌ HealthRecordsList: Error deleting record:', error);
-      alert('Có lỗi khi xóa kết quả đo: ' + (error as Error).message);
+      alert('Error deleting measurement: ' + (error as Error).message);
     } finally {
       setIsDeleting(null);
     }
@@ -108,13 +108,13 @@ export default function HealthRecordsList({
       const result = exportToCsv(exportData, selectedSessionId);
       
       if (result.success) {
-        alert(`✅ Xuất CSV thành công!\n📁 File: ${result.filename}\n📊 Số bản ghi: ${result.recordCount}`);
+        alert(`✅ CSV export successful!\n📁 File: ${result.filename}\n📊 Records: ${result.recordCount}`);
       } else {
-        alert('❌ Có lỗi xảy ra khi xuất CSV!');
+        alert('❌ An error occurred while exporting CSV!');
       }
     } catch (error) {
       console.error('Export error:', error);
-      alert('❌ Có lỗi xảy ra khi xuất CSV!');
+      alert('❌ An error occurred while exporting CSV!');
     } finally {
       setIsExporting(false);
     }
@@ -133,13 +133,13 @@ export default function HealthRecordsList({
       const result = exportSummaryToCsv(exportData, selectedSessionId);
       
       if (result.success) {
-        alert(`✅ Xuất thống kê thành công!\n📁 File: ${result.filename}`);
+        alert(`✅ Summary export successful!\n📁 File: ${result.filename}`);
       } else {
-        alert('❌ Có lỗi xảy ra khi xuất thống kê!');
+        alert('❌ An error occurred while exporting summary!');
       }
     } catch (error) {
       console.error('Export summary error:', error);
-      alert('❌ Có lỗi xảy ra khi xuất thống kê!');
+      alert('❌ An error occurred while exporting summary!');
     } finally {
       setIsExporting(false);
     }
@@ -160,7 +160,7 @@ export default function HealthRecordsList({
       .filter(record => record.zScore !== undefined && record.zScore !== null)
       .map(record => getZScoreSimpleName(record.zScore!))
   )).sort((a, b) => {
-    const order = ['-3SD', '-2SD', '-1SD', 'Trung bình', '+1SD', '+2SD', '+3SD'];
+    const order = ['-3SD', '-2SD', '-1SD', 'Normal', '+1SD', '+2SD', '+3SD'];
     return order.indexOf(a) - order.indexOf(b);
   });
 
@@ -171,7 +171,7 @@ export default function HealthRecordsList({
       {/* Header với View Mode Toggle */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 lg:mb-6">
         <div className="flex items-center gap-4 mb-2 sm:mb-0">
-          <h2 className="text-xl lg:text-2xl font-bold">📊 Kết quả đo chỉ số</h2>
+          <h2 className="text-xl lg:text-2xl font-bold">📊 Measurement Results</h2>
           
           {/* View Mode Toggle */}
           <div className="flex bg-gray-100 rounded-lg p-1">
@@ -183,7 +183,7 @@ export default function HealthRecordsList({
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              📊 Tổng hợp
+              📊 Summary
             </button>
             <button
               onClick={() => setViewMode('individual')}
@@ -193,14 +193,14 @@ export default function HealthRecordsList({
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              👤 Từng học sinh
+              👤 Individual
             </button>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-            Tổng: {filteredRecords.length} lần đo
+            Total: {filteredRecords.length} measurements
           </div>
           
           {/* Export buttons - chỉ hiện khi ở view list */}
@@ -218,12 +218,12 @@ export default function HealthRecordsList({
                 {isExporting ? (
                   <>
                     <span className="animate-spin">⏳</span>
-                    <span className="hidden sm:inline">Đang xuất...</span>
+                    <span className="hidden sm:inline">Exporting...</span>
                   </>
                 ) : (
                   <>
                     <span>📄</span>
-                    <span className="hidden sm:inline">Xuất CSV</span>
+                    <span className="hidden sm:inline">Export CSV</span>
                   </>
                 )}
               </button>
@@ -238,7 +238,7 @@ export default function HealthRecordsList({
                 }`}
               >
                 <span>📊</span>
-                <span className="hidden sm:inline">Thống kê</span>
+                <span className="hidden sm:inline">Statistics</span>
               </button>
             </>
           )}
@@ -258,23 +258,23 @@ export default function HealthRecordsList({
           {/* Filters */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">🔍 Tìm kiếm học sinh</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">🔍 Search Student</label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm theo tên học sinh..."
+                placeholder="Search by student name..."
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">📈 Lọc theo Z-Score</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">📈 Filter by Z-Score</label>
               <select
                 value={filterZScore}
                 onChange={(e) => setFilterZScore(e.target.value)}
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Tất cả Z-Score</option>
+                <option value="">All Z-Scores</option>
                 {uniqueZScoreShortNames.map(shortName => (
                   <option key={shortName} value={shortName}>{shortName}</option>
                 ))}
@@ -286,7 +286,7 @@ export default function HealthRecordsList({
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">📊</div>
               <p className="text-gray-500 text-lg">
-                {records.length === 0 ? 'Chưa có kết quả đo nào' : 'Không tìm thấy kết quả phù hợp'}
+                {records.length === 0 ? 'No measurements yet' : 'No matching results found'}
               </p>
             </div>
           ) : (
@@ -417,15 +417,15 @@ export default function HealthRecordsList({
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">STT</th>
-                      <th className="px-4 py-4 text-left text-sm font-medium text-gray-500">Họ và tên</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Lớp</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Chiều cao (cm)</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Cân nặng (kg)</th>
+                      <th className="px-4 py-4 text-left text-sm font-medium text-gray-500">Full Name</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Class</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Height (cm)</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Weight (kg)</th>
                       <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">BMI</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Vòng eo (cm)</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Huyết áp (mmHg)</th>
-                      <th className="px-4 py-4 text-center text-sm font-medium text-gray-500">Z-Score, Ghi chú - Tư vấn</th>
-                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Thao tác</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Waist (cm)</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Blood Pressure (mmHg)</th>
+                      <th className="px-4 py-4 text-center text-sm font-medium text-gray-500">Z-Score, Notes - Advice</th>
+                      <th className="px-3 py-4 text-center text-sm font-medium text-gray-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

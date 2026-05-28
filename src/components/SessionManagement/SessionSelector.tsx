@@ -13,7 +13,7 @@ export default function SessionSelector({
   sessions, 
   selectedSession, 
   onSessionSelect, 
-  placeholder = "Chọn phiên đo...",
+  placeholder = "Select session...",
   disabled = false 
 }: SessionSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,7 +100,7 @@ export default function SessionSelector({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm kiếm phiên..."
+              placeholder="Search sessions..."
               className="w-full px-4 py-3 lg:py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               autoFocus
             />
@@ -111,7 +111,7 @@ export default function SessionSelector({
             {filteredSessions.length === 0 ? (
               <div className="px-4 py-8 text-center text-gray-500">
                 <div className="text-4xl mb-2">🔍</div>
-                <p>{searchTerm ? 'Không tìm thấy phiên phù hợp' : 'Chưa có phiên đo nào'}</p>
+                <p>{searchTerm ? 'No matching sessions found' : 'No sessions available'}</p>
               </div>
             ) : (
               filteredSessions.map(session => (

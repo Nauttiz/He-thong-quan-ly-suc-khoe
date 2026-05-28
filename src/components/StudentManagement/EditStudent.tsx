@@ -18,15 +18,15 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
     
     // Required fields only
     if (!studentData.name?.trim()) {
-      validationErrors.push('Họ và tên không được để trống');
+      validationErrors.push('Full name is required');
     }
     
     if (!studentData.class?.trim()) {
-      validationErrors.push('Lớp không được để trống');
+      validationErrors.push('Class is required');
     }
     
     if (!studentData.birthYear || studentData.birthYear < 2000 || studentData.birthYear > new Date().getFullYear()) {
-      validationErrors.push('Năm sinh không hợp lệ (2000 - ' + new Date().getFullYear() + ')');
+      validationErrors.push('Invalid birth year (2000 - ' + new Date().getFullYear() + ')');
     }
     
     // School và address không bắt buộc - không validate
@@ -64,7 +64,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
 
     } catch (error) {
       console.error('❌ Error updating student:', error);
-      const errorMessage = 'Có lỗi khi cập nhật học sinh: ' + (error as Error).message;
+      const errorMessage = 'Error updating student: ' + (error as Error).message;
       setErrors([errorMessage]);
     } finally {
       setIsSubmitting(false);
@@ -75,7 +75,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl lg:rounded-3xl shadow-xl p-4 lg:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4 lg:mb-6">
-          <h2 className="text-xl lg:text-2xl font-bold">✏️ Sửa thông tin học sinh</h2>
+          <h2 className="text-xl lg:text-2xl font-bold">✏️ Edit Student Information</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -88,7 +88,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
         {/* Error Display */}
         {errors.length > 0 && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <h3 className="font-medium text-red-800 mb-2">❌ Lỗi nhập liệu:</h3>
+            <h3 className="font-medium text-red-800 mb-2">❌ Input Error:</h3>
             <ul className="text-sm text-red-700 space-y-1">
               {errors.map((error, index) => (
                 <li key={index}>• {error}</li>
@@ -101,7 +101,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Họ và tên *
+                Full Name *
               </label>
               <input
                 type="text"
@@ -110,13 +110,13 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
                 disabled={isSubmitting}
-                placeholder="VD: Nguyễn Văn A"
+                placeholder="e.g. Nguyen Van A"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Năm sinh *
+                Birth Year *
               </label>
               <input
                 type="number"
@@ -134,14 +134,14 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lớp *
+                Class *
               </label>
               <input
                 type="text"
                 value={editedStudent.class}
                 onChange={(e) => setEditedStudent(s => ({...s, class: e.target.value}))}
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="VD: 5A, 6B"
+                placeholder="e.g. 5A, 6B"
                 required
                 disabled={isSubmitting}
               />
@@ -149,7 +149,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Giới tính *
+                Gender *
               </label>
               <select
                 value={editedStudent.gender}
@@ -158,8 +158,8 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
                 required
                 disabled={isSubmitting}
               >
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
               </select>
             </div>
           </div>
@@ -167,27 +167,27 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
           {/* Optional Fields */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Trường <span className="text-gray-500">(không bắt buộc)</span>
+              School <span className="text-gray-500">(optional)</span>
             </label>
             <input
               type="text"
               value={editedStudent.school || ''}
               onChange={(e) => setEditedStudent(s => ({...s, school: e.target.value}))}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="VD: Trường THCS Nguyễn Huệ"
+              placeholder="e.g. ABC School"
               disabled={isSubmitting}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Địa chỉ <span className="text-gray-500">(không bắt buộc)</span>
+              Address <span className="text-gray-500">(optional)</span>
             </label>
             <textarea
               value={editedStudent.address || ''}
               onChange={(e) => setEditedStudent(s => ({...s, address: e.target.value}))}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              placeholder="Địa chỉ nhà học sinh..."
+              placeholder="Student's home address..."
               rows={3}
               disabled={isSubmitting}
             />
@@ -200,7 +200,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
               disabled={isSubmitting}
               className="flex-1 py-3 px-6 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
             >
-              Hủy
+              Cancel
             </button>
             <button
               type="submit"
@@ -213,7 +213,7 @@ export default function EditStudent({ student, onStudentUpdate, onClose }: EditS
             >
               <span className="flex items-center justify-center">
                 <span className="mr-2">{isSubmitting ? '⏳' : '✏️'}</span>
-                {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+                {isSubmitting ? 'Updating...' : 'Update'}
               </span>
             </button>
           </div>

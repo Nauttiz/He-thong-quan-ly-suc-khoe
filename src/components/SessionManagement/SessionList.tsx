@@ -21,7 +21,7 @@ export default function SessionList({
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const handleDelete = async (sessionId: string) => {
-    if (!window.confirm('Bạn có chắc muốn xóa phiên đo này và tất cả dữ liệu liên quan?')) {
+    if (!window.confirm('Are you sure you want to delete this session and all related data?')) {
       return;
     }
 
@@ -30,7 +30,7 @@ export default function SessionList({
       await onSessionDelete(sessionId);
     } catch (error) {
       console.error('Error deleting session:', error);
-      alert('Có lỗi khi xóa phiên đo!');
+      alert('Error deleting session!');
     } finally {
       setIsDeleting(null);
     }
@@ -46,7 +46,7 @@ export default function SessionList({
       setEditingSession(null);
     } catch (error) {
       console.error('Error updating session:', error);
-      alert('Có lỗi khi cập nhật phiên đo!');
+      alert('Error updating session!');
     }
   };
 
@@ -57,17 +57,17 @@ export default function SessionList({
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">Danh sách phiên đo</h2>
+        <h2 className="text-xl font-bold">Session List</h2>
         <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-          Tổng: {sessions.length} phiên
+          Total: {sessions.length} sessions
         </div>
       </div>
 
       {sessions.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-400 text-6xl mb-4">📋</div>
-          <p className="text-gray-500 text-lg">Chưa có phiên đo nào</p>
-          <p className="text-gray-400 text-sm mt-2">Tạo phiên đo đầu tiên để bắt đầu</p>
+          <p className="text-gray-500 text-lg">No sessions yet</p>
+          <p className="text-gray-400 text-sm mt-2">Create your first session to get started</p>
         </div>
       ) : (
         <>
@@ -88,16 +88,16 @@ export default function SessionList({
                       <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">
                         #{session.code || `S${index + 1}`}
                       </span>
-                      <h3 className="font-bold text-lg">{session.name || 'Phiên không tên'}</h3>
+                      <h3 className="font-bold text-lg">{session.name || 'Unnamed session'}</h3>
                     </div>
                     <div className="text-sm text-gray-600 space-y-1">
-                      <p>🏫 {session.school || 'Chưa có trường'}</p>
+                      <p>🏫 {session.school || 'No school'}</p>
                       <p>📅 {new Date(session.date || session.createdAt).toLocaleDateString('vi-VN')}</p>
                     </div>
                   </div>
                   {selectedSession?.id === session.id && (
                     <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                      Đã chọn
+                      Selected
                     </span>
                   )}
                 </div>
@@ -114,7 +114,7 @@ export default function SessionList({
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                   >
-                    {selectedSession?.id === session.id ? '✅ Đã chọn' : '👆 Chọn phiên'}
+                    {selectedSession?.id === session.id ? '✅ Selected' : '👆 Select'}
                   </button>
                   
                   <button
@@ -150,12 +150,12 @@ export default function SessionList({
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Mã phiên</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Tên phiên</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Trường</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Ngày tạo</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Trạng thái</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Thao tác</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Code</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Session Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">School</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Date</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Status</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -170,10 +170,10 @@ export default function SessionList({
                       {session.code || `S${index + 1}`}
                     </td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                      {session.name || 'Phiên không tên'}
+                      {session.name || 'Unnamed session'}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">
-                      {session.school || 'Chưa có trường'}
+                      {session.school || 'No school'}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">
                       {new Date(session.date || session.createdAt).toLocaleDateString('vi-VN')}
@@ -181,11 +181,11 @@ export default function SessionList({
                     <td className="px-4 py-3 text-center">
                       {selectedSession?.id === session.id ? (
                         <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                          ✅ Đã chọn
+                          ✅ Selected
                         </span>
                       ) : (
                         <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                          Chưa chọn
+                          Not selected
                         </span>
                       )}
                     </td>
@@ -202,7 +202,7 @@ export default function SessionList({
                               : 'bg-blue-600 text-white hover:bg-blue-700'
                           }`}
                         >
-                          {selectedSession?.id === session.id ? 'Đã chọn' : 'Chọn'}
+                          {selectedSession?.id === session.id ? 'Selected' : 'Select'}
                         </button>
                         
                         <button
@@ -214,7 +214,7 @@ export default function SessionList({
                               : 'bg-yellow-600 text-white hover:bg-yellow-700'
                           }`}
                         >
-                          Sửa
+                          Edit
                         </button>
                         
                         <button
@@ -226,7 +226,7 @@ export default function SessionList({
                               : 'bg-red-600 text-white hover:bg-red-700'
                           }`}
                         >
-                          {isDeleting === session.id ? '⏳' : 'Xóa'}
+                          {isDeleting === session.id ? '⏳' : 'Delete'}
                         </button>
                       </div>
                     </td>

@@ -56,7 +56,7 @@ export default function StudentDetailView({
       case '-3SD': return 'text-red-700 bg-red-100 border-red-200';
       case '-2SD': return 'text-orange-700 bg-orange-100 border-orange-200';
       case '-1SD': return 'text-yellow-700 bg-yellow-100 border-yellow-200';
-      case 'Trung bình': return 'text-green-700 bg-green-100 border-green-200';
+      case 'Normal': return 'text-green-700 bg-green-100 border-green-200';
       case '+1SD': return 'text-yellow-700 bg-yellow-100 border-yellow-200';
       case '+2SD': return 'text-orange-700 bg-orange-100 border-orange-200';
       case '+3SD': return 'text-red-700 bg-red-100 border-red-200';
@@ -68,31 +68,31 @@ export default function StudentDetailView({
     <div className="space-y-6">
       {/* Student Selection */}
       <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4">👤 Chọn học sinh để xem chi tiết</h3>
+        <h3 className="text-lg font-semibold mb-4">👤 Select a student to view details</h3>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">🔍 Tìm kiếm</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">🔍 Search</label>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm theo tên hoặc lớp..."
+              placeholder="Search by name or class..."
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">📋 Chọn học sinh</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">📋 Select Student</label>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">-- Chọn học sinh --</option>
+              <option value="">-- Select a student --</option>
               {filteredStudents.map(student => (
                 <option key={student.id} value={student.id}>
-                  {student.name} - Lớp {student.class}
+                  {student.name} - Class {student.class}
                 </option>
               ))}
             </select>
@@ -125,28 +125,28 @@ export default function StudentDetailView({
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">{selectedStudent.name}</h2>
-                <p className="text-gray-600">Lớp {selectedStudent.class} • {selectedStudent.gender === 'male' ? 'Nam' : 'Nữ'}</p>
+                <p className="text-gray-600">Class {selectedStudent.class} • {selectedStudent.gender === 'male' ? 'Male' : 'Female'}</p>
                 {selectedStudent.school && (
                   <p className="text-sm text-gray-500">🏫 {selectedStudent.school}</p>
                 )}
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-500">Tuổi</p>
+                <p className="text-sm text-gray-500">Age</p>
                 <p className="text-xl font-semibold">{new Date().getFullYear() - selectedStudent.birthYear}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <p className="text-sm text-gray-500">Năm sinh</p>
+                <p className="text-sm text-gray-500">Birth Year</p>
                 <p className="text-lg font-semibold">{selectedStudent.birthYear}</p>
               </div>
               <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <p className="text-sm text-gray-500">Địa chỉ</p>
+                <p className="text-sm text-gray-500">Address</p>
                 <p className="text-lg font-semibold">{selectedStudent.address || 'N/A'}</p>
               </div>
               <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <p className="text-sm text-gray-500">Số lần đo</p>
+                <p className="text-sm text-gray-500">Measurements</p>
                 <p className="text-lg font-semibold text-blue-600">{studentRecords.length}</p>
               </div>
             </div>
@@ -155,16 +155,16 @@ export default function StudentDetailView({
           {/* Latest Health Status */}
           {studentRecords.length > 0 && (
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4">📊 Tình trạng sức khỏe hiện tại (WHO 2007)</h3>
+              <h3 className="text-lg font-semibold mb-4">📊 Current Health Status (WHO 2007)</h3>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-200">
-                  <p className="text-sm text-blue-600">Chiều cao</p>
+                  <p className="text-sm text-blue-600">Height</p>
                   <p className="text-2xl font-bold text-blue-800">{studentRecords[0].height}</p>
                   <p className="text-sm text-blue-600">cm</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 text-center border border-green-200">
-                  <p className="text-sm text-green-600">Cân nặng</p>
+                  <p className="text-sm text-green-600">Weight</p>
                   <p className="text-2xl font-bold text-green-800">{studentRecords[0].weight}</p>
                   <p className="text-sm text-green-600">kg</p>
                 </div>
@@ -183,7 +183,7 @@ export default function StudentDetailView({
                   </div>
                 </div>
                 <div className="bg-orange-50 rounded-lg p-4 text-center border border-orange-200">
-                  <p className="text-sm text-orange-600">Phân loại</p>
+                  <p className="text-sm text-orange-600">Classification</p>
                   {(() => {
                     const age = new Date().getFullYear() - selectedStudent.birthYear;
                     const whoClassification = getWHOClassification(studentRecords[0].bmi, age, selectedStudent.gender);
@@ -206,13 +206,13 @@ export default function StudentDetailView({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {studentRecords[0].waist && (
                     <div className="bg-pink-50 rounded-lg p-4 text-center border border-pink-200">
-                      <p className="text-sm text-pink-600">Vòng eo</p>
+                      <p className="text-sm text-pink-600">Waist</p>
                       <p className="text-xl font-bold text-pink-800">{studentRecords[0].waist} cm</p>
                     </div>
                   )}
                   {studentRecords[0].bloodPressure && (
                     <div className="bg-red-50 rounded-lg p-4 text-center border border-red-200">
-                      <p className="text-sm text-red-600">Huyết áp</p>
+                      <p className="text-sm text-red-600">Blood Pressure</p>
                       <p className="text-xl font-bold text-red-800">
                         {studentRecords[0].bloodPressure.systolic}/{studentRecords[0].bloodPressure.diastolic}
                       </p>
@@ -226,27 +226,27 @@ export default function StudentDetailView({
           {/* Health Records History */}
           <div className="bg-white rounded-xl p-6 border border-gray-200">
             <h3 className="text-lg font-semibold mb-4">
-              📈 Lịch sử đo chỉ số ({studentRecords.length} lần đo)
+              📈 Measurement History ({studentRecords.length} measurements)
             </h3>
 
             {studentRecords.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-gray-400 text-4xl mb-2">📊</div>
-                <p className="text-gray-500">Chưa có kết quả đo nào</p>
+                <p className="text-gray-500">No measurements yet</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Ngày đo</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Chiều cao</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Cân nặng</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Date</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Height</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Weight</th>
                       <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">BMI</th>
                       <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Z-Score</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Phân loại</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Vòng eo</th>
-                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Huyết áp</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Classification</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Waist</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">Blood Pressure</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

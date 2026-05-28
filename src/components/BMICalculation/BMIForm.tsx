@@ -70,7 +70,7 @@ export default function BMIForm({
       const diastolicNum = diastolic ? parseInt(diastolic) : undefined;
 
       if (!heightNum || !weightNum) {
-        throw new Error('Chiều cao và cân nặng là bắt buộc');
+        throw new Error('Height and weight are required');
       }
 
       const bmi = calculateBMI(heightNum, weightNum);
@@ -119,7 +119,7 @@ export default function BMIForm({
 
     } catch (error) {
       console.error('❌ BMIForm: Error creating health record:', error);
-      alert('Có lỗi xảy ra khi lưu kết quả đo: ' + (error as Error).message);
+      alert('An error occurred while saving: ' + (error as Error).message);
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +133,7 @@ export default function BMIForm({
     if (classification === '-3SD' || classification === '+3SD') color = 'red';
     else if (classification === '-2SD' || classification === '+2SD') color = 'orange';
     else if (classification === '-1SD' || classification === '+1SD') color = 'yellow';
-    else if (classification === 'Trung bình') color = 'green';
+    else if (classification === 'Normal') color = 'green';
     
     return { classification, color };
   };
@@ -142,11 +142,11 @@ export default function BMIForm({
     <div className="bg-white rounded-2xl lg:rounded-3xl shadow-sm p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4 lg:mb-6">
         <h2 className="text-xl lg:text-2xl font-bold">
-          {editingRecord ? '✏️ Chỉnh sửa kết quả đo' : 'Nhập thông số đo'}
+          {editingRecord ? '✏️ Edit Measurement' : 'Enter Measurements'}
         </h2>
         {editingRecord && (
           <div className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full">
-            Đang chỉnh sửa
+            Editing
           </div>
         )}
       </div>
@@ -156,7 +156,7 @@ export default function BMIForm({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Chiều cao (cm) *
+              Height (cm) *
             </label>
             <input
               type="number"
@@ -174,7 +174,7 @@ export default function BMIForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Cân nặng (kg) *
+              Weight (kg) *
             </label>
             <input
               type="number"
@@ -195,7 +195,7 @@ export default function BMIForm({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Vòng eo (cm)
+              Waist (cm)
             </label>
             <input
               type="number"
@@ -212,7 +212,7 @@ export default function BMIForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Huyết áp tâm thu (mmHg)
+              Systolic BP (mmHg)
             </label>
             <input
               type="number"
@@ -228,7 +228,7 @@ export default function BMIForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Huyết áp tâm trương (mmHg)
+              Diastolic BP (mmHg)
             </label>
             <input
               type="number"
@@ -246,7 +246,7 @@ export default function BMIForm({
         {/* Notes */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            📝 Ghi chú
+            📝 Notes
           </label>
           <textarea
             value={notes}
@@ -254,7 +254,7 @@ export default function BMIForm({
             rows={3}
             disabled={isSubmitting}
             className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-            placeholder="Ghi chú về tình trạng sức khỏe, khuyến nghị..."
+            placeholder="Notes about health status, recommendations..."
           />
         </div>
 
@@ -281,7 +281,7 @@ export default function BMIForm({
                   color === 'red' ? 'text-red-900' :
                   'text-blue-900'
                 }`}>
-                  📊 Kết quả đánh giá (WHO 2007):
+                  📊 Assessment Result (WHO 2007):
                 </h3>
                 
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 text-sm">
@@ -296,7 +296,7 @@ export default function BMIForm({
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Phân loại:</span>
+                    <span className="text-gray-600">Classification:</span>
                     <span className={`ml-2 font-bold ${
                       color === 'green' ? 'text-green-700' :
                       color === 'yellow' ? 'text-yellow-700' :
@@ -315,12 +315,12 @@ export default function BMIForm({
                         parseFloat(height),
                         age,
                         selectedStudent.gender
-                      ).toLocaleString()} cal/ngày
+                      ).toLocaleString()} cal/day
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Tuổi:</span>
-                    <span className="ml-2 font-bold text-gray-700">{age} tuổi</span>
+                    <span className="text-gray-600">Age:</span>
+                    <span className="ml-2 font-bold text-gray-700">{age} yrs</span>
                   </div>
                 </div>
               </div>
@@ -342,10 +342,10 @@ export default function BMIForm({
             }`}
           >
             {isSubmitting
-              ? '⏳ Đang xử lý...'
+              ? '⏳ Processing...'
               : editingRecord
-              ? '💾 Cập nhật kết quả'
-              : '💾 Lưu kết quả đo'
+              ? '💾 Update Result'
+              : '💾 Save Result'
             }
           </button>
         </div>

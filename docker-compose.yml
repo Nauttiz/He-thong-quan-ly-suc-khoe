@@ -1,0 +1,64 @@
+# ============================================================
+# docker-compose.yml — BMI Tracker
+#
+# Services:
+#   app      — Production build served by Nginx (port 80)
+#   app-dev  — Development server with hot-reload (port 3000)
+#
+# Usage:
+#   Production preview:   docker compose up app
+#   Development:          docker compose up app-dev
+# ============================================================
+
+services:
+
+  # ── Production preview (Nginx + static build) ─────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_FIREBASE_API_KEY:            ${REACT_APP_FIREBASE_API_KEY}
+        REACT_APP_FIREBASE_AUTH_DOMAIN:        ${REACT_APP_FIREBASE_AUTH_DOMAIN}
+        REACT_APP_FIREBASE_PROJECT_ID:         ${REACT_APP_FIREBASE_PROJECT_ID}
+        REACT_APP_FIREBASE_STORAGE_BUCKET:     ${REACT_APP_FIREBASE_STORAGE_BUCKET}
+        REACT_APP_FIREBASE_MESSAGING_SENDER_ID: ${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}
+        REACT_APP_FIREBASE_APP_ID:             ${REACT_APP_FIREBASE_APP_ID}
+    image: bmi-tracker:latest
+    container_name: bmi-tracker-prod
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Development (Node + hot-reload) ───────────────────────
+  app-dev:
+    image: node:18-alpine
+    container_name: bmi-tracker-dev
+    working_dir: /app
+    volumes:
+      # Mount source code for hot-reload
+      - .:/app
+      # Preserve container's node_modules (avoid Windows path issues)
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      # Enable polling for file watchers on Windows/WSL volumes
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      # Firebase vars (loaded from .env file)
+      - REACT_APP_FIREBASE_API_KEY=${REACT_APP_FIREBASE_API_KEY}
+      - REACT_APP_FIREBASE_AUTH_DOMAIN=${REACT_APP_FIREBASE_AUTH_DOMAIN}
+      - REACT_APP_FIREBASE_PROJECT_ID=${REACT_APP_FIREBASE_PROJECT_ID}
+      - REACT_APP_FIREBASE_STORAGE_BUCKET=${REACT_APP_FIREBASE_STORAGE_BUCKET}
+      - REACT_APP_FIREBASE_MESSAGING_SENDER_ID=${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}
+      - REACT_APP_FIREBASE_APP_ID=${REACT_APP_FIREBASE_APP_ID}
+    command: sh -c "npm ci --legacy-peer-deps && npm start"
+    stdin_open: true
+    tty: true

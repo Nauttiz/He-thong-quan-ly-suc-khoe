@@ -22,24 +22,24 @@ export function exportToCsv(data: ExportData, sessionId?: string) {
 
   // Prepare CSV headers
   const headers = [
-    'STT',
-    'Họ và tên',
-    'Lớp',
-    'Giới tính',
-    'Năm sinh',
-    'Tuổi',
-    'Chiều cao (cm)',
-    'Cân nặng (kg)',
+    'No.',
+    'Full Name',
+    'Class',
+    'Gender',
+    'Birth Year',
+    'Age',
+    'Height (cm)',
+    'Weight (kg)',
     'BMI',
     'Z-Score',
-    'Phân loại WHO',
-    'Vòng eo (cm)',
-    'Huyết áp tâm thu',
-    'Huyết áp tâm trương',
-    'BMR (cal/ngày)',
-    'Ghi chú',
-    'Ngày đo',
-    'Thời gian tạo'
+    'WHO Classification',
+    'Waist (cm)',
+    'Systolic BP',
+    'Diastolic BP',
+    'BMR (cal/day)',
+    'Notes',
+    'Measurement Date',
+    'Created At'
   ];
 
   // Prepare CSV data
@@ -52,7 +52,7 @@ export function exportToCsv(data: ExportData, sessionId?: string) {
       index + 1,
       `"${record.studentName || ''}"`,
       `"${record.studentClass || student?.class || ''}"`,
-      student?.gender === 'male' ? 'Nam' : 'Nữ',
+      student?.gender === 'male' ? 'Male' : 'Female',
       student?.birthYear || '',
       age,
       record.height,
@@ -92,7 +92,7 @@ export function exportToCsv(data: ExportData, sessionId?: string) {
     const currentDate = new Date().toISOString().split('T')[0];
     const filename = session 
       ? `${session.name}_${currentDate}.csv`
-      : `KetQuaDo_${currentDate}.csv`;
+      : `HealthRecords_${currentDate}.csv`;
     
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
@@ -132,7 +132,7 @@ export function exportSummaryToCsv(data: ExportData, sessionId?: string) {
     '-3SD': 0,
     '-2SD': 0, 
     '-1SD': 0,
-    'Trung bình': 0,
+    'Normal': 0,
     '+1SD': 0,
     '+2SD': 0,
     '+3SD': 0
@@ -157,19 +157,19 @@ export function exportSummaryToCsv(data: ExportData, sessionId?: string) {
   });
 
   const summaryRows = [
-    ['Chỉ số', 'Giá trị', 'Tỷ lệ (%)'],
-    [`"Tổng số lần đo"`, total, '100%'],
+    ['Metric', 'Value', 'Percentage (%)'],
+    [`"Total Measurements"`, total, '100%'],
     ['', '', ''],
-    [`"PHÂN LOẠI THEO WHO Z-SCORE"`, '', ''],
+    [`"CLASSIFICATION BY WHO Z-SCORE"`, '', ''],
     ...Object.entries(zScoreCounts).map(([category, count]) => [
       `"${category}"`,
       count,
       total > 0 ? `${((count / total) * 100).toFixed(1)}%` : '0%'
     ]),
     ['', '', ''],
-    [`"PHÂN LOẠI THEO GIỚI TÍNH"`, '', ''],
-    [`"Nam"`, genderCounts.male, total > 0 ? `${((genderCounts.male / total) * 100).toFixed(1)}%` : '0%'],
-    [`"Nữ"`, genderCounts.female, total > 0 ? `${((genderCounts.female / total) * 100).toFixed(1)}%` : '0%']
+    [`"CLASSIFICATION BY GENDER"`, '', ''],
+    [`"Male"`, genderCounts.male, total > 0 ? `${((genderCounts.male / total) * 100).toFixed(1)}%` : '0%'],
+    [`"Female"`, genderCounts.female, total > 0 ? `${((genderCounts.female / total) * 100).toFixed(1)}%` : '0%']
   ];
 
   const csvContent = summaryRows.map(row => row.join(',')).join('\n');
@@ -184,7 +184,7 @@ export function exportSummaryToCsv(data: ExportData, sessionId?: string) {
     link.setAttribute('href', url);
     
     const currentDate = new Date().toISOString().split('T')[0];
-    const filename = `ThongKe_${currentDate}.csv`;
+    const filename = `Summary_${currentDate}.csv`;
     
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';

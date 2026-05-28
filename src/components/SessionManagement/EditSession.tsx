@@ -20,7 +20,7 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
     e.preventDefault();
     
     if (!formData.name.trim() || !formData.school.trim()) {
-      alert('Vui lòng điền đầy đủ thông tin!');
+      alert('Please fill in all required fields!');
       return;
     }
 
@@ -40,7 +40,7 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
       
     } catch (error) {
       console.error('Error updating session:', error);
-      alert('Có lỗi khi cập nhật phiên đo!');
+      alert('Error updating session!');
     } finally {
       setIsSaving(false);
     }
@@ -56,7 +56,7 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-900">✏️ Chỉnh sửa phiên đo</h3>
+            <h3 className="text-xl font-bold text-gray-900">✏️ Edit Session</h3>
             <button
               onClick={onCancel}
               disabled={isSaving}
@@ -69,28 +69,28 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mã phiên
+                Session Code
               </label>
               <input
                 type="text"
                 name="code"
                 value={formData.code}
                 onChange={handleChange}
-                placeholder="VD: HK1-2025"
+                placeholder="e.g. S1-2025"
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tên phiên đo *
+                Session Name *
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="VD: Khám sức khỏe HK1 2024-2025"
+                placeholder="e.g. Health Check S1 2024-2025"
                 required
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -98,7 +98,7 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Ngày thực hiện
+                📅 Date
               </label>
               <input
                 type="date"
@@ -111,14 +111,14 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Trường học *
+                School *
               </label>
               <input
                 type="text"
                 name="school"
                 value={formData.school}
                 onChange={handleChange}
-                placeholder="VD: Trường THCS Cao Văn Bé"
+                placeholder="e.g. ABC Secondary School"
                 required
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -135,7 +135,7 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Hủy
+                Cancel
               </button>
               <button
                 type="submit"
@@ -149,10 +149,10 @@ export default function EditSession({ session, onSave, onCancel }: EditSessionPr
                 {isSaving ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="animate-spin">⏳</span>
-                    Đang lưu...
+                    Saving...
                   </span>
                 ) : (
-                  '💾 Lưu thay đổi'
+                  '💾 Save Changes'
                 )}
               </button>
             </div>

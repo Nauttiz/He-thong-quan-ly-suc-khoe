@@ -24,15 +24,15 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
     
     // Required fields only
     if (!studentData.name?.trim()) {
-      validationErrors.push('Họ và tên không được để trống');
+      validationErrors.push('Full name is required');
     }
     
     if (!studentData.class?.trim()) {
-      validationErrors.push('Lớp không được để trống');
+      validationErrors.push('Class is required');
     }
     
     if (!studentData.birthYear || studentData.birthYear < 2000 || studentData.birthYear > new Date().getFullYear()) {
-      validationErrors.push('Năm sinh không hợp lệ (2000 - ' + new Date().getFullYear() + ')');
+      validationErrors.push('Invalid birth year (2000 - ' + new Date().getFullYear() + ')');
     }
     
     // School và address không bắt buộc - không validate
@@ -83,7 +83,7 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
 
   } catch (error) {
     console.error('❌ Error in StudentForm:', error);
-    const errorMessage = 'Có lỗi khi thêm học sinh: ' + (error as Error).message;
+    const errorMessage = 'Error adding student: ' + (error as Error).message;
     setErrors([errorMessage]);
   } finally {
     setIsSubmitting(false);
@@ -92,12 +92,12 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
 
   return (
     <div className="bg-white rounded-2xl lg:rounded-3xl shadow-sm p-4 lg:p-6">
-      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">👥 Thêm học sinh mới</h2>
+      <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">👥 Add New Student</h2>
       
       {/*  ADD: Error Display */}
       {errors.length > 0 && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-          <h3 className="font-medium text-red-800 mb-2">❌ Lỗi nhập liệu:</h3>
+          <h3 className="font-medium text-red-800 mb-2">❌ Input Error:</h3>
           <ul className="text-sm text-red-700 space-y-1">
             {errors.map((error, index) => (
               <li key={index}>• {error}</li>
@@ -110,7 +110,7 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-             Họ và tên *
+             Full Name *
             </label>
             <input
               type="text"
@@ -119,13 +119,13 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
               disabled={isSubmitting}
-              placeholder="VD: Nguyễn Văn A"
+              placeholder="e.g. Nguyen Van A"
             />
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Năm sinh *
+              Birth Year *
             </label>
             <input
               type="number"
@@ -143,14 +143,14 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Lớp *
+              Class *
             </label>
             <input
               type="text"
               value={student.class}
               onChange={(e) => setStudent(s => ({...s, class: e.target.value}))}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="VD: 5A, 6B"
+              placeholder="e.g. 5A, 6B"
               required
               disabled={isSubmitting}
             />
@@ -158,7 +158,7 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Giới tính *
+              Gender *
             </label>
             <select
               value={student.gender}
@@ -167,8 +167,8 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
               required
               disabled={isSubmitting}
             >
-              <option value="male">Nam</option>
-              <option value="female">Nữ</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
             </select>
           </div>
         </div>
@@ -176,27 +176,27 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
         {/* OPTIONAL FIELDS */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Trường <span className="text-gray-500">(không bắt buộc)</span>
+            School <span className="text-gray-500">(optional)</span>
           </label>
           <input
             type="text"
             value={student.school}
             onChange={(e) => setStudent(s => ({...s, school: e.target.value}))}
             className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="VD: Trường THCS Nguyễn Huệ"
+            placeholder="e.g. ABC School"
             disabled={isSubmitting}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Địa chỉ <span className="text-gray-500">(không bắt buộc)</span>
+            Address <span className="text-gray-500">(optional)</span>
           </label>
           <textarea
             value={student.address}
             onChange={(e) => setStudent(s => ({...s, address: e.target.value}))}
             className="w-full rounded-xl border border-gray-300 px-4 py-3 lg:py-2 text-base lg:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            placeholder="Địa chỉ nhà học sinh..."
+            placeholder="Student's home address..."
             rows={3}
             disabled={isSubmitting}
           />
@@ -213,7 +213,7 @@ export default function StudentForm({ onStudentCreated }: StudentFormProps) {
         >
           <span className="flex items-center justify-center">
             <span className="mr-2">{isSubmitting ? '⏳' : '👥'}</span>
-            {isSubmitting ? 'Đang thêm...' : 'Thêm học sinh'}
+            {isSubmitting ? 'Adding...' : 'Add Student'}
           </span>
         </button>
       </form>

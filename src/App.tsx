@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Session, Student, HealthRecord } from './types/interfaces';
 import { useFirestoreData } from './hooks/useFirestoreData';
 import { studentsService, healthRecordsService, sessionsService } from './services/firestoreService';
+import { useAuth } from './contexts/AuthContext';
+import LoginPage from './components/Auth/LoginPage';
 
 import { db } from './firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
@@ -20,11 +22,15 @@ import ExcelImport from './components/StudentManagement/ExcelImport';
 import BMIForm from './components/BMICalculation/BMIForm';
 import HealthRecordsList from './components/BMICalculation/HealthRecordsList';
 
-import './App.css';
+// Dashboard
+import Dashboard from './components/Dashboard/Dashboard';
 
-type ActiveTab = 'sessions' | 'students' | 'measurement' | 'records';
+
+type ActiveTab = 'sessions' | 'students' | 'measurement' | 'records' | 'dashboard';
 
 export default function App() {
+  const { currentUser, loading: authLoading, logout } = useAuth();
+
   // Use Firestore data instead of localStorage
   const { 
     sessions, 
@@ -58,6 +64,22 @@ export default function App() {
     testFirebase();
   }, []);
 
+  // Show login page if not authenticated
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🔄</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Checking authentication...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <LoginPage />;
+  }
+
   // Session handlers - updated to use Firestore
   const handleSessionCreated = async (sessionData: Omit<Session, 'id'>) => {
   try {
@@ -70,7 +92,7 @@ export default function App() {
     setSelectedSession(newSession);
   } catch (error) {
     console.error('Error creating session:', error);
-    alert('Có lỗi khi tạo phiên đo!');
+    alert('Error creating session!');
   }
 };
 
@@ -92,7 +114,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error updating session:', error);
-      alert('Có lỗi khi cập nhật phiên đo!');
+      alert('Error updating session!');
     }
   };
 
@@ -164,7 +186,7 @@ export default function App() {
       setSelectedSession(null);
     }
     
-    alert(`✅ Đã xóa phiên đo và ${relatedStudents.length + relatedRecords.length} bản ghi liên quan!`);
+    alert(`✅ Session deleted along with ${relatedStudents.length + relatedRecords.length} related records!`);
     
   } catch (error) {
     console.error('❌ Error deleting session:', error);
@@ -190,7 +212,7 @@ const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
     
   } catch (error) {
     console.error('❌ App: Error creating student:', error);
-    alert('Có lỗi khi tạo học sinh!');
+    alert('Error creating student!');
   }
 };
 
@@ -208,10 +230,10 @@ const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
     const newStudents = await Promise.all(addPromises);
     
     setStudents(prev => [...prev, ...newStudents]);
-    alert(`Đã import thành công ${importedStudents.length} học sinh!`);
+    alert(`Successfully imported ${importedStudents.length} students!`);
   } catch (error) {
     console.error('Error importing students:', error);
-    alert('Có lỗi khi import học sinh!');
+    alert('Error importing students!');
   }
 };
 
@@ -233,7 +255,7 @@ const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
       }
     } catch (error) {
       console.error('Error updating student:', error);
-      alert('Có lỗi khi cập nhật học sinh!');
+      alert('Error updating student!');
     }
   };
 
@@ -319,17 +341,17 @@ const handleDeleteAllStudents = async (): Promise<void> => {
       const updatedRecord = { ...recordData, id: editingRecord.id };
       setHealthRecords(prev => prev.map(r => r.id === editingRecord.id ? updatedRecord : r));
       setEditingRecord(null);
-      alert('Đã cập nhật kết quả đo thành công!');
+      alert('Measurement result updated successfully!');
     } else {
       // Create new record
       const newId = await healthRecordsService.add(recordData);
       const newRecord = { ...recordData, id: newId };
       setHealthRecords(prev => [...prev, newRecord]);
-      alert('Đã lưu kết quả đo thành công!');
+      alert('Measurement result saved successfully!');
     }
   } catch (error) {
     console.error('Error saving health record:', error);
-    alert('Có lỗi khi lưu kết quả đo!');
+    alert('Error saving measurement result!');
   }
 };
 
@@ -372,8 +394,8 @@ const handleDeleteAllStudents = async (): Promise<void> => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🔄</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Đang tải dữ liệu...</h2>
-          <p className="text-gray-500">Kết nối với Firebase...</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading data...</h2>
+          <p className="text-gray-500">Connecting to Firebase...</p>
         </div>
       </div>
     );
@@ -385,13 +407,13 @@ const handleDeleteAllStudents = async (): Promise<void> => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">❌</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Lỗi kết nối</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Connection Error</h2>
           <p className="text-gray-500 mb-4">{error}</p>
           <button 
             onClick={() => window.location.reload()}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
-            Thử lại
+            Retry
           </button>
         </div>
       </div>
@@ -400,10 +422,11 @@ const handleDeleteAllStudents = async (): Promise<void> => {
 
   // Navigation tabs
   const tabs = [
-    { id: 'sessions' as ActiveTab, name: 'Quản lý phiên', icon: '📋', count: sessions.length },
-    { id: 'students' as ActiveTab, name: 'Quản lý học sinh', icon: '👥', count: students.length },
-    { id: 'measurement' as ActiveTab, name: 'Đo chỉ số', icon: '📏', disabled: !selectedSession || !selectedStudent },
-    { id: 'records' as ActiveTab, name: 'Kết quả đo', icon: '📊', count: healthRecords.length }
+    { id: 'sessions' as ActiveTab, name: 'Sessions', icon: '📋', count: sessions.length },
+    { id: 'students' as ActiveTab, name: 'Students', icon: '👥', count: students.length },
+    { id: 'measurement' as ActiveTab, name: 'Measurement', icon: '📏', disabled: !selectedSession || !selectedStudent },
+    { id: 'records' as ActiveTab, name: 'Records', icon: '📊', count: healthRecords.length },
+    { id: 'dashboard' as ActiveTab, name: 'Dashboard', icon: '📈' }
   ];
 
   return (
@@ -414,7 +437,7 @@ const handleDeleteAllStudents = async (): Promise<void> => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                🔥 Hệ Thống Quản Lý Sức Khỏe (Firebase)
+                🔥 Health Management System (Firebase)
               </h1>
               <span className="ml-3 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                 v2.0
@@ -435,9 +458,20 @@ const handleDeleteAllStudents = async (): Promise<void> => {
               )}
               {editingRecord && (
                 <div className="bg-yellow-50 px-3 py-1 rounded-full text-yellow-700">
-                  ✏️ Đang chỉnh sửa
+                  ✏️ Editing
                 </div>
               )}
+              <div className="flex items-center space-x-2 border-l pl-4 ml-2">
+                <span className="text-gray-500 truncate max-w-[150px]" title={currentUser.email || ''}>
+                  👤 {currentUser.email}
+                </span>
+                <button
+                  onClick={logout}
+                  className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1 rounded-full transition-colors font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -502,8 +536,8 @@ const handleDeleteAllStudents = async (): Promise<void> => {
             {sessions.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🎯</div>
-                <h3 className="text-xl font-medium text-gray-900 mb-2">Chào mừng đến với hệ thống Firebase!</h3>
-                <p className="text-gray-500">Bắt đầu bằng cách tạo phiên nhập liệu đầu tiên của bạn.</p>
+                <h3 className="text-xl font-medium text-gray-900 mb-2">Welcome to the Firebase system!</h3>
+                <p className="text-gray-500">Get started by creating your first data entry session.</p>
               </div>
             )}
           </div>
@@ -515,20 +549,20 @@ const handleDeleteAllStudents = async (): Promise<void> => {
             {!selectedSession ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📋</div>
-                <h3 className="text-xl font-medium text-gray-900 mb-2">Chưa chọn phiên đo</h3>
-                <p className="text-gray-500 mb-4">Vui lòng chọn hoặc tạo phiên đo trước khi quản lý học sinh.</p>
+                <h3 className="text-xl font-medium text-gray-900 mb-2">No session selected</h3>
+                <p className="text-gray-500 mb-4">Please select or create a session before managing students.</p>
                 <button
                   onClick={() => setActiveTab('sessions')}
                   className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
                 >
-                  Quay về quản lý phiên
+                  Go to Sessions
                 </button>
               </div>
             ) : (
               <>
                 {/* Session Info */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <h3 className="font-medium text-blue-900 mb-1">Phiên hiện tại:</h3>
+                  <h3 className="font-medium text-blue-900 mb-1">Current session:</h3>
                   <p className="text-blue-700">{selectedSession.name} - {selectedSession.school}</p>
                 </div>
 
@@ -559,10 +593,10 @@ const handleDeleteAllStudents = async (): Promise<void> => {
             {!selectedSession || !selectedStudent ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📏</div>
-                <h3 className="text-xl font-medium text-gray-900 mb-2">Chưa đủ thông tin để đo</h3>
+                <h3 className="text-xl font-medium text-gray-900 mb-2">Insufficient information for measurement</h3>
                 <div className="text-gray-500 space-y-2">
-                  {!selectedSession && <p>❌ Chưa chọn phiên đo</p>}
-                  {!selectedStudent && <p>❌ Chưa chọn học sinh</p>}
+                  {!selectedSession && <p>❌ No session selected</p>}
+                  {!selectedStudent && <p>❌ No student selected</p>}
                 </div>
                 <div className="flex justify-center gap-4 mt-6">
                   {!selectedSession && (
@@ -570,7 +604,7 @@ const handleDeleteAllStudents = async (): Promise<void> => {
                       onClick={() => setActiveTab('sessions')}
                       className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
                     >
-                      Chọn phiên đo
+                      Select Session
                     </button>
                   )}
                   {!selectedStudent && selectedSession && (
@@ -578,7 +612,7 @@ const handleDeleteAllStudents = async (): Promise<void> => {
                       onClick={() => setActiveTab('students')}
                       className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors"
                     >
-                      Chọn học sinh
+                      Select Student
                     </button>
                   )}
                 </div>
@@ -588,29 +622,29 @@ const handleDeleteAllStudents = async (): Promise<void> => {
                 {/* Current Selection Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <h3 className="font-medium text-blue-900 mb-1">Phiên đo:</h3>
+                    <h3 className="font-medium text-blue-900 mb-1">Session:</h3>
                     <p className="text-blue-700">{selectedSession.name}</p>
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <h3 className="font-medium text-green-900 mb-1">Học sinh:</h3>
+                    <h3 className="font-medium text-green-900 mb-1">Student:</h3>
                     <p className="text-green-700">
-                      {selectedStudent.name} - Lớp {selectedStudent.class} -
-                      {selectedStudent.gender === 'male' ? ' Nam' : ' Nữ'}
+                      {selectedStudent.name} - Class {selectedStudent.class} -
+                      {selectedStudent.gender === 'male' ? ' Male' : ' Female'}
                     </p>
                   </div>
                 </div>
 
                 {editingRecord && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <h3 className="font-medium text-yellow-900 mb-1">✏️ Đang chỉnh sửa kết quả đo:</h3>
+                    <h3 className="font-medium text-yellow-900 mb-1">✏️ Editing measurement result:</h3>
                     <p className="text-yellow-700">
-                      BMI: {editingRecord.bmi} - Ngày đo: {new Date(editingRecord.createdAt).toLocaleDateString('vi-VN')}
+                      BMI: {editingRecord.bmi} - Date: {new Date(editingRecord.createdAt).toLocaleDateString('vi-VN')}
                     </p>
                     <button
                       onClick={() => setEditingRecord(null)}
                       className="mt-2 text-sm bg-yellow-200 hover:bg-yellow-300 text-yellow-800 px-3 py-1 rounded-lg transition-colors"
                     >
-                      Hủy chỉnh sửa
+                      Cancel editing
                     </button>
                   </div>
                 )}
@@ -627,19 +661,28 @@ const handleDeleteAllStudents = async (): Promise<void> => {
           </div>
         )}
 
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <Dashboard
+            sessions={sessions}
+            students={students}
+            healthRecords={healthRecords}
+          />
+        )}
+
         {/* Health Records Tab */}
         {activeTab === 'records' && (
           <div className="space-y-6">
             {/* Session Filter */}
             <div className="bg-white rounded-xl shadow-sm p-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h3 className="font-medium">Lọc theo phiên đo:</h3>
+                <h3 className="font-medium">Filter by session:</h3>
                 <div className="sm:w-80">
                   <SessionSelector
                     sessions={sessions}
                     selectedSession={selectedSession}
                     onSessionSelect={setSelectedSession}
-                    placeholder="Chọn phiên để lọc kết quả..."
+                    placeholder="Select session to filter results..."
                   />
                 </div>
               </div>
@@ -662,8 +705,8 @@ const handleDeleteAllStudents = async (): Promise<void> => {
       <footer className="bg-white border-t border-gray-200 py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-gray-500">
-            <p>© 2025 Hệ thống quản lý sức khỏe - Ứng dụng theo dõi sức khỏe học sinh (Firebase Version)</p>
-            <p className="text-sm mt-1">Phiên bản 2.0 - Powered by Firebase Firestore</p>
+            <p>© 2025 Health Management System - Student Health Tracking Application (Firebase Version)</p>
+            <p className="text-sm mt-1">Version 2.0 - Powered by Firebase Firestore</p>
           </div>
         </div>
       </footer>

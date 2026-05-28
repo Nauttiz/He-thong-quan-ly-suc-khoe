@@ -65,7 +65,7 @@ export function getZScoreSimpleName(zScore: number): string {
   if (zScore < -3) return '-3SD';
   if (zScore < -2) return '-2SD';
   if (zScore < -1) return '-1SD';
-  if (zScore <= 1) return 'Trung bình';
+  if (zScore <= 1) return 'Normal';
   if (zScore <= 2) return '+1SD';
   if (zScore <= 3) return '+2SD';
   return '+3SD';
