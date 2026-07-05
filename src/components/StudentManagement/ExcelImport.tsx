@@ -5,13 +5,15 @@ import { studentsService } from '../../services/firestoreService';
 
 interface ExcelImportProps {
   onStudentsImported?: (students: Student[]) => void;
+  sessionId?: string;
+  existingStudents?: Student[];
 }
 
 interface ExcelRow {
   [key: string]: any;
 }
 
-export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
+export default function ExcelImport({ onStudentsImported, sessionId, existingStudents }: ExcelImportProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,8 +100,17 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
     });
   };
 
-  const validateAndNormalizeData = (rawData: ExcelRow[]): any[] => {
-    const validatedData = [];
+  interface ValidatedRow {
+    name: string;
+    class: string;
+    gender: string;
+    birthYear: number;
+    address: string;
+    school: string;
+  }
+
+  const validateAndNormalizeData = (rawData: ExcelRow[]): ValidatedRow[] => {
+    const validatedData: ValidatedRow[] = [];
     const errors = [];
 
     for (let i = 0; i < rawData.length; i++) {
@@ -172,6 +183,17 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
 
       const gender = genderStr.includes('nam') || genderStr.includes('male') ? 'Nam' : 'Nữ';
 
+      // Skip rows duplicated inside the same Excel file
+      const isDuplicateInFile = validatedData.some(s =>
+        s.name.toLowerCase() === name.toLowerCase() &&
+        s.class === className &&
+        s.birthYear === birthYear
+      );
+      if (isDuplicateInFile) {
+        console.warn(`⚠️ Row ${rowNum}: duplicate of an earlier row in the file, skipped (${name} - ${className})`);
+        continue;
+      }
+
       validatedData.push({
         name,
         class: className,
@@ -233,14 +255,29 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
         throw new Error('No valid data found in file');
       }
 
+      // Skip students that already exist in the app (same name + class + birth year)
+      const newRows = validatedData.filter(row => {
+        const alreadyExists = (existingStudents || []).some(s =>
+          s.name.trim().toLowerCase() === row.name.toLowerCase() &&
+          s.class === row.class &&
+          s.birthYear === row.birthYear
+        );
+        if (alreadyExists) {
+          console.warn(`⚠️ Skipping "${row.name}" (${row.class}) — already exists`);
+        }
+        return !alreadyExists;
+      });
+      const skippedCount = validatedData.length - newRows.length;
+
       // Prepare students for Firestore (WITHOUT ID)
-      const studentsToAdd: Omit<Student, 'id'>[] = validatedData.map(row => ({
+      const studentsToAdd: Omit<Student, 'id'>[] = newRows.map(row => ({
         name: row.name,
         class: row.class,
         gender: row.gender === 'Nam' ? 'male' : 'female',
         birthYear: row.birthYear,
         school: row.school,
         address: row.address,
+        sessionId,
         createdAt: new Date().toISOString()
       }));
 
@@ -268,7 +305,10 @@ export default function ExcelImport({ onStudentsImported }: ExcelImportProps) {
       }
       
       // Show success message
-      setSuccessMessage(`✅ Successfully imported ${addedStudents.length} students to Firestore!`);
+      setSuccessMessage(
+        `✅ Successfully imported ${addedStudents.length} students to Firestore!` +
+        (skippedCount > 0 ? ` (${skippedCount} duplicate(s) skipped)` : '')
+      );
       setIsProcessing(false);
       
       // Reset file input

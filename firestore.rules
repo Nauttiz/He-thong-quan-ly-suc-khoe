@@ -1,9 +1,73 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Only authenticated users can read/write
+
+    // ===== PHÂN QUYỀN =====
+    // Role của mỗi tài khoản lưu trong document users/{uid}, field "role":
+    //   - 'pending'  : vừa tự đăng ký, chưa được duyệt -> không truy cập được gì
+    //   - 'customer' : khách hàng đã duyệt -> dùng app (đo, thống kê, dashboard)
+    //   - 'admin'    : toàn quyền, kể cả duyệt tài khoản và đổi role
+    //
+    // Tạo admin đầu tiên: đăng ký tài khoản trong app, rồi vào Firebase Console
+    // -> Firestore -> collection "users" -> document của bạn -> sửa role = "admin".
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRoleDoc() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && hasRoleDoc() && myRole() == 'admin';
+    }
+
+    function canUseApp() {
+      return isSignedIn() && hasRoleDoc() && myRole() in ['customer', 'admin'];
+    }
+
+    // Hồ sơ tài khoản & role
+    match /users/{uid} {
+      // Mỗi người chỉ đọc được hồ sơ của chính mình; admin đọc được tất cả
+      allow get: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow list: if isAdmin();
+      // Tự đăng ký chỉ được tạo hồ sơ của CHÍNH MÌNH với role 'pending'
+      // (không thể tự phong cho mình quyền customer/admin)
+      allow create: if isAdmin()
+        || (isSignedIn()
+            && request.auth.uid == uid
+            && request.resource.data.role == 'pending');
+      // Chỉ admin được duyệt/đổi role/xóa tài khoản
+      allow update, delete: if isAdmin();
+    }
+
+    // Dữ liệu nghiệp vụ: customer và admin đều dùng được
+    match /sessions/{sessionId} {
+      allow read, write: if canUseApp();
+    }
+
+    match /students/{studentId} {
+      allow read, write: if canUseApp();
+    }
+
+    match /healthRecords/{recordId} {
+      allow read, write: if canUseApp();
+    }
+
+    // Collection 'test' chỉ dùng kiểm tra kết nối — chỉ cho đọc
+    match /test/{docId} {
+      allow read: if canUseApp();
+      allow write: if false;
+    }
+
+    // Mọi collection khác: cấm hoàn toàn
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

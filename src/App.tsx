@@ -25,11 +25,14 @@ import HealthRecordsList from './components/BMICalculation/HealthRecordsList';
 // Dashboard
 import Dashboard from './components/Dashboard/Dashboard';
 
+// Admin
+import UserManagement from './components/Admin/UserManagement';
 
-type ActiveTab = 'sessions' | 'students' | 'measurement' | 'records' | 'dashboard';
+
+type ActiveTab = 'sessions' | 'students' | 'measurement' | 'records' | 'dashboard' | 'users';
 
 export default function App() {
-  const { currentUser, loading: authLoading, logout } = useAuth();
+  const { currentUser, role, loading: authLoading, logout } = useAuth();
 
   // Use Firestore data instead of localStorage
   const { 
@@ -80,6 +83,28 @@ export default function App() {
     return <LoginPage />;
   }
 
+  // Signed in but not yet approved by an admin — block access to all data
+  if (role !== 'customer' && role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Account pending approval</h2>
+          <p className="text-gray-500 mb-6">
+            Your account <strong>{currentUser.email}</strong> has been created but must be
+            approved by an administrator before you can access the system.
+          </p>
+          <button
+            onClick={logout}
+            className="bg-red-50 text-red-600 hover:bg-red-100 px-6 py-2 rounded-xl transition-colors font-medium"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Session handlers - updated to use Firestore
   const handleSessionCreated = async (sessionData: Omit<Session, 'id'>) => {
   try {
@@ -126,11 +151,10 @@ export default function App() {
       throw new Error('Session ID is required');
     }
     
-    // Find related data
-    const relatedStudents = students.filter(s => 
-      s.sessionId === sessionId || // if students have sessionId
-      !s.sessionId // or if no sessionId field, delete all students
-    );
+    // Only delete students that belong to THIS session. Students without a
+    // sessionId (legacy data) are kept — deleting them here would wipe
+    // students that belong to other sessions.
+    const relatedStudents = students.filter(s => s.sessionId === sessionId);
     
     const relatedRecords = healthRecords.filter(r => r.sessionId === sessionId);
     
@@ -140,7 +164,7 @@ export default function App() {
     if (relatedRecords.length > 0) {
       console.log('🗑️ Deleting health records...');
       for (const record of relatedRecords) {
-        if (record.id) { // ← FIX: Check if record.id exists
+        if (record.id) {
           try {
             await healthRecordsService.delete(record.id);
             console.log(`✅ Deleted health record: ${record.id}`);
@@ -157,7 +181,7 @@ export default function App() {
     if (relatedStudents.length > 0) {
       console.log('🗑️ Deleting students...');
       for (const student of relatedStudents) {
-        if (student.id) { // ← FIX: Check if student.id exists
+        if (student.id) { 
           try {
             await studentsService.delete(student.id);
             console.log(`✅ Deleted student: ${student.id}`);
@@ -177,9 +201,7 @@ export default function App() {
     
     // Update local state
     setSessions(prev => prev.filter(s => s.id !== sessionId));
-    setStudents(prev => prev.filter(s => 
-      s.sessionId !== sessionId && s.sessionId !== undefined
-    ));
+    setStudents(prev => prev.filter(s => s.sessionId !== sessionId));
     setHealthRecords(prev => prev.filter(r => r.sessionId !== sessionId));
     
     if (selectedSession?.id === sessionId) {
@@ -190,7 +212,7 @@ export default function App() {
     
   } catch (error) {
     console.error('❌ Error deleting session:', error);
-    throw error; // ← ADD: Re-throw for SessionList error handling
+    throw error; 
   }
 };
 
@@ -198,13 +220,19 @@ export default function App() {
 const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
   try {
     console.log('📝 App: Creating student with data:', studentData);
-    
-    const newId = await studentsService.add(studentData);
+
+    // Attach the current session so the student is linked to exactly one session
+    const dataWithSession: Omit<Student, 'id'> = {
+      ...studentData,
+      sessionId: selectedSession?.id
+    };
+
+    const newId = await studentsService.add(dataWithSession);
     console.log('✅ App: Student created with ID:', newId);
-    
-    const newStudent: Student = { 
-      ...studentData, 
-      id: newId 
+
+    const newStudent: Student = {
+      ...dataWithSession,
+      id: newId
     };
     
     setStudents(prev => [...prev, newStudent]);
@@ -216,26 +244,15 @@ const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
   }
 };
 
-  const handleStudentsImported = async (importedStudents: Omit<Student, 'id'>[]) => {
-  try {
-    console.log('📝 App: Importing students:', importedStudents.length);
-    
-    // Use Promise.all for better performance
-    const addPromises = importedStudents.map(studentData => 
-      studentsService.add(studentData).then(newId => ({ 
-        ...studentData, 
-        id: newId 
-      }))
-    );
-    const newStudents = await Promise.all(addPromises);
-    
-    setStudents(prev => [...prev, ...newStudents]);
-    alert(`Successfully imported ${importedStudents.length} students!`);
-  } catch (error) {
-    console.error('Error importing students:', error);
-    alert('Error importing students!');
-  }
-};
+  // ExcelImport already saved these students to Firestore — only merge them
+  // into local state here. Writing them again caused duplicate documents.
+  const handleStudentsImported = (importedStudents: Student[]) => {
+    console.log('📝 App: Merging imported students into state:', importedStudents.length);
+    setStudents(prev => {
+      const existingIds = new Set(prev.map(s => s.id));
+      return [...prev, ...importedStudents.filter(s => !existingIds.has(s.id))];
+    });
+  };
 
   const handleStudentSelect = (student: Student) => {
     setSelectedStudent(student);
@@ -259,7 +276,7 @@ const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
     }
   };
 
-  const handleStudentDelete = async (studentId: string): Promise<void> => { // ← ADD: Promise<void>
+  const handleStudentDelete = async (studentId: string): Promise<void> => { 
   try {
     console.log('🗑️ App: Deleting student and related records:', studentId);
     
@@ -288,7 +305,7 @@ const handleStudentCreated = async (studentData: Omit<Student, 'id'>) => {
     
   } catch (error) {
     console.error('❌ App: Error deleting student:', error);
-    throw error; // ← ADD: throw for proper error handling
+    throw error; 
   }
 };
 
@@ -312,7 +329,6 @@ const handleDeleteAllStudents = async (): Promise<void> => {
     // Delete from Firestore
     await studentsService.deleteAll(validStudentIds);
     
-    // ← FIX: Update local state directly instead of calling non-existent function
     setStudents([]); // Clear all students from local state
     
     // Also clear related health records
@@ -374,17 +390,17 @@ const handleDeleteAllStudents = async (): Promise<void> => {
     setActiveTab('measurement');
   };
 
-  const handleRecordDelete = async (recordId: string): Promise<void> => { // ← ADD: Promise<void>
+  const handleRecordDelete = async (recordId: string): Promise<void> => { 
   try {
     console.log('🗑️ App: Deleting health record:', recordId);
     
-    await healthRecordsService.delete(recordId); // ← ADD: await
+    await healthRecordsService.delete(recordId);
     setHealthRecords(prev => prev.filter(r => r.id !== recordId));
     
     console.log('✅ App: Health record deleted successfully');
   } catch (error) {
     console.error('❌ App: Error deleting health record:', error);
-    throw error; // ← ADD: throw for proper error handling
+    throw error;  
   }
 };
 
@@ -426,7 +442,11 @@ const handleDeleteAllStudents = async (): Promise<void> => {
     { id: 'students' as ActiveTab, name: 'Students', icon: '👥', count: students.length },
     { id: 'measurement' as ActiveTab, name: 'Measurement', icon: '📏', disabled: !selectedSession || !selectedStudent },
     { id: 'records' as ActiveTab, name: 'Records', icon: '📊', count: healthRecords.length },
-    { id: 'dashboard' as ActiveTab, name: 'Dashboard', icon: '📈' }
+    { id: 'dashboard' as ActiveTab, name: 'Dashboard', icon: '📈' },
+    // Only admins can manage users
+    ...(role === 'admin'
+      ? [{ id: 'users' as ActiveTab, name: 'Users', icon: '👤' }]
+      : [])
   ];
 
   return (
@@ -464,6 +484,13 @@ const handleDeleteAllStudents = async (): Promise<void> => {
               <div className="flex items-center space-x-2 border-l pl-4 ml-2">
                 <span className="text-gray-500 truncate max-w-[150px]" title={currentUser.email || ''}>
                   👤 {currentUser.email}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  role === 'admin'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {role === 'admin' ? 'Admin' : 'User'}
                 </span>
                 <button
                   onClick={logout}
@@ -569,7 +596,11 @@ const handleDeleteAllStudents = async (): Promise<void> => {
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                   <div className="xl:col-span-1 space-y-6">
                     <StudentForm onStudentCreated={handleStudentCreated} />
-                    <ExcelImport onStudentsImported={handleStudentsImported} />
+                    <ExcelImport
+                      onStudentsImported={handleStudentsImported}
+                      sessionId={selectedSession.id}
+                      existingStudents={students}
+                    />
                   </div>
                   <div className="xl:col-span-2">
                     <StudentList
@@ -659,6 +690,11 @@ const handleDeleteAllStudents = async (): Promise<void> => {
               </>
             )}
           </div>
+        )}
+
+        {/* User Management Tab (admin only) */}
+        {activeTab === 'users' && role === 'admin' && (
+          <UserManagement />
         )}
 
         {/* Dashboard Tab */}
