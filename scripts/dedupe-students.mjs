@@ -8,18 +8,39 @@
  * Sau đó xóa luôn các healthRecords bị trùng hệt nhau (cùng studentId + sessionId + createdAt).
  *
  * Cách chạy (mặc định CHỈ XEM TRƯỚC, không sửa gì):
- *   set FIREBASE_EMAIL=ban@email.com
- *   set FIREBASE_PASSWORD=matkhau
  *   node scripts/dedupe-students.mjs
+ *   -> script sẽ hỏi email + mật khẩu (dùng tài khoản ADMIN)
  *
  * Khi đã xem kết quả và đồng ý, chạy thật:
  *   node scripts/dedupe-students.mjs --apply
  */
+import readline from 'node:readline';
 import { initializeApp } from 'firebase/app';
 import {
   getFirestore, collection, getDocs, doc, writeBatch
 } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+
+function ask(question, hidden = false) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  if (hidden) {
+    rl._writeToOutput = function (str) {
+      // Che mật khẩu bằng dấu *
+      if (str.includes(question)) {
+        rl.output.write(question);
+      } else if (str.trim().length > 0) {
+        rl.output.write('*');
+      }
+    };
+  }
+  return new Promise(resolve => {
+    rl.question(question, answer => {
+      rl.close();
+      if (hidden) process.stdout.write('\n');
+      resolve(answer.trim());
+    });
+  });
+}
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDeVhhHzolYtWxJZy7rFXKXNxLDuZuNNqE',
@@ -28,13 +49,6 @@ const firebaseConfig = {
 };
 
 const APPLY = process.argv.includes('--apply');
-const email = process.env.FIREBASE_EMAIL;
-const password = process.env.FIREBASE_PASSWORD;
-
-if (!email || !password) {
-  console.error('❌ Cần đặt biến môi trường FIREBASE_EMAIL và FIREBASE_PASSWORD trước khi chạy.');
-  process.exit(1);
-}
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -55,6 +69,14 @@ async function commitInChunks(operations, label) {
 }
 
 async function main() {
+  const email = process.env.FIREBASE_EMAIL || await ask('📧 Email (tài khoản ADMIN): ');
+  const password = process.env.FIREBASE_PASSWORD || await ask('🔑 Mật khẩu: ', true);
+
+  if (!email || !password) {
+    console.error('❌ Thiếu email hoặc mật khẩu.');
+    process.exit(1);
+  }
+
   console.log(`🔐 Đăng nhập với ${email}...`);
   await signInWithEmailAndPassword(auth, email, password);
 
